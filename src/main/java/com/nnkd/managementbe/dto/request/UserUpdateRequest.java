@@ -1,5 +1,6 @@
 package com.nnkd.managementbe.dto.request;
 
+import com.nnkd.managementbe.validator.PasswordConstraint;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -10,5 +11,6 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserUpdateRequest {
     String username;
+    @PasswordConstraint
     String password;
 }

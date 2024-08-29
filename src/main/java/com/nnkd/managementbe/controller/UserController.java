@@ -5,6 +5,7 @@ import com.nnkd.managementbe.dto.request.UserCreationRequest;
 import com.nnkd.managementbe.dto.request.UserUpdateRequest;
 import com.nnkd.managementbe.model.User;
 import com.nnkd.managementbe.service.UserService;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -27,7 +28,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ApiResponse<User> createUser(@RequestBody UserCreationRequest request) {
+    public ApiResponse<User> createUser(@Valid @RequestBody UserCreationRequest request) {
         ApiResponse<User> apiResponse = new ApiResponse<>();
         apiResponse.setResult(userService.save(request));
         return apiResponse;
@@ -53,4 +54,5 @@ public class UserController {
         userService.deleteUser(userId);
         return apiResponse;
     }
+
 }

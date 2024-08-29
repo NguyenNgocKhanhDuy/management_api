@@ -7,7 +7,6 @@ import com.nnkd.managementbe.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,7 +22,11 @@ public class UserService {
     }
 
     public User save(UserCreationRequest request) {
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Email has already been used");
+        }
         User user = new User().builder()
+                .email(request.getEmail())
                 .username(request.getUsername())
                 .password(request.getPassword())
                 .build();
@@ -37,13 +40,20 @@ public class UserService {
 
     public User updateUser(String userId, UserUpdateRequest request){
         User user = getUserById(userId);
+        if (user == null) {
+            throw new RuntimeException("User not found: "+userId);
+        }
         user.setUsername(request.getUsername());
         user.setPassword(request.getPassword());
         return userRepository.save(user);
     }
 
     public void deleteUser(String userId) {
-        userRepository.deleteById(userId);
+        if (userRepository.existsById(userId)) {
+            userRepository.deleteById(userId);
+        } else {
+            throw new RuntimeException("User not found: "+userId);
+        }
     }
 
 }

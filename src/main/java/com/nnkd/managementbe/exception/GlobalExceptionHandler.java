@@ -2,6 +2,7 @@ package com.nnkd.managementbe.exception;
 
 import com.nnkd.managementbe.dto.request.ApiResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailSendException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -23,4 +24,14 @@ public class GlobalExceptionHandler {
         apiResponse.setMessage(e.getFieldError().getDefaultMessage());
         return ResponseEntity.badRequest().body(apiResponse);
     }
+
+    @ExceptionHandler(value = MailSendException.class)
+    ResponseEntity<ApiResponse> handlingMessagingException(MailSendException e) {
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setStatus(false);
+        apiResponse.setMessage(e.getMessageExceptions()[0].getMessage());
+        return ResponseEntity.badRequest().body(apiResponse);
+    }
+
+
 }

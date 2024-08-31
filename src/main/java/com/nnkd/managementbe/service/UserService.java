@@ -9,6 +9,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 @Service
@@ -28,7 +31,7 @@ public class UserService {
         User user = new User().builder()
                 .email(request.getEmail())
                 .username(request.getUsername())
-                .password(request.getPassword())
+                .password(hashPassword(request.getPassword()))
                 .build();
 
         return userRepository.save(user);
@@ -37,6 +40,7 @@ public class UserService {
     public User getUserById(String id) {
         return userRepository.findById(id).orElse(null);
     }
+
 
     public User updateUser(String userId, UserUpdateRequest request){
         User user = getUserById(userId);
@@ -53,6 +57,18 @@ public class UserService {
             userRepository.deleteById(userId);
         } else {
             throw new RuntimeException("User not found: "+userId);
+        }
+    }
+
+    public String hashPassword(String password){
+        try {
+            MessageDigest sha256 = null;
+            sha256 = MessageDigest.getInstance("SHA-256");
+            byte[] hash = sha256.digest(password.getBytes());
+            BigInteger number = new BigInteger(1, hash);
+            return number.toString(16);
+        } catch (NoSuchAlgorithmException e) {
+            return null;
         }
     }
 

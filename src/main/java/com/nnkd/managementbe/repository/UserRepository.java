@@ -8,7 +8,7 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends MongoRepository<User, String> {
-    @Override
-    Optional<User> findById(String id);
     boolean existsByEmail(String email);
+    Optional<User> findUserByEmail(String email);
+
 }

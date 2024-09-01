@@ -1,9 +1,6 @@
 package com.nnkd.managementbe.service;
 
-import com.nnkd.managementbe.dto.request.ApiResponse;
-import com.nnkd.managementbe.dto.request.UserCreationRequest;
-import com.nnkd.managementbe.dto.request.UserUpdateRequest;
-import com.nnkd.managementbe.dto.request.VerifyCodeRequest;
+import com.nnkd.managementbe.dto.request.*;
 import com.nnkd.managementbe.dto.response.VerifyCodeResponse;
 import com.nnkd.managementbe.model.User;
 import com.nnkd.managementbe.repository.UserRepository;
@@ -68,6 +65,23 @@ public class UserService {
         ApiResponse apiResponse = new ApiResponse<>();
         apiResponse.setResult(VerifyCodeResponse.builder().valid(valid).build());
         return apiResponse;
+    }
+
+    public User resendVerifyCode(VerifyCodeRequest request, String code) {
+        User user = userRepository.findUserByEmail(request.getEmail()).get();
+        if (user == null)
+            throw new NoSuchElementException("No user found: "+request.getEmail());
+        user.setCode(code);
+        user.setDate(LocalDateTime.now());
+        return userRepository.save(user);
+    }
+
+    public User updateUserPassword(UserUpdatePasswordRequest request) {
+        User user = userRepository.findUserByEmail(request.getEmail()).get();
+        if (user == null)
+            throw new NoSuchElementException("No user found: "+request.getEmail());
+        user.setPassword(hashPassword(request.getPassword()));
+        return userRepository.save(user);
     }
 
     public User getUserById(String id) {

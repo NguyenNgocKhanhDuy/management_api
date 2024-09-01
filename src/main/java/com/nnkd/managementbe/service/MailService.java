@@ -3,6 +3,7 @@ package com.nnkd.managementbe.service;
 import com.nnkd.managementbe.dto.request.ApiResponse;
 import com.nnkd.managementbe.dto.request.MailSendRequest;
 import com.nnkd.managementbe.dto.request.UserCreationRequest;
+import com.nnkd.managementbe.dto.request.VerifyCodeRequest;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;

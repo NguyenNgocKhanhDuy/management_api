@@ -1,9 +1,6 @@
 package com.nnkd.managementbe.controller;
 
-import com.nnkd.managementbe.dto.request.ApiResponse;
-import com.nnkd.managementbe.dto.request.UserCreationRequest;
-import com.nnkd.managementbe.dto.request.UserUpdateRequest;
-import com.nnkd.managementbe.dto.request.VerifyCodeRequest;
+import com.nnkd.managementbe.dto.request.*;
 import com.nnkd.managementbe.model.User;
 import com.nnkd.managementbe.service.MailService;
 import com.nnkd.managementbe.service.UserService;
@@ -49,6 +46,22 @@ public class UserController {
     @PostMapping("/verifyCode")
     public ApiResponse register(@RequestBody VerifyCodeRequest request) {
         return userService.verifyCode(request);
+    }
+
+    @PostMapping("/resendVerifyCode")
+    public ApiResponse resendVerifyCode(@RequestBody VerifyCodeRequest request) {
+        String code = userService.randomCodeVerify();
+        User user = userService.resendVerifyCode(request, code);
+        ApiResponse apiResponse = mailService.sendCodeVerify(UserCreationRequest.builder().email(request.getEmail()).build(), code);
+        apiResponse.setStatus(user != null && apiResponse.isStatus());
+        return apiResponse;
+    }
+
+    @PostMapping("/updatePassword")
+    public ApiResponse userUpdatePassword(@RequestBody UserUpdatePasswordRequest request) {
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setResult(userService.updateUserPassword(request));
+        return apiResponse;
     }
 
     @GetMapping("/{userId}")

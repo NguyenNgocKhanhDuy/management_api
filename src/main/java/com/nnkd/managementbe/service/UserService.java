@@ -1,7 +1,10 @@
 package com.nnkd.managementbe.service;
 
+import com.nnkd.managementbe.dto.request.ApiResponse;
 import com.nnkd.managementbe.dto.request.UserCreationRequest;
 import com.nnkd.managementbe.dto.request.UserUpdateRequest;
+import com.nnkd.managementbe.dto.request.VerifyCodeRequest;
+import com.nnkd.managementbe.dto.response.VerifyCodeResponse;
 import com.nnkd.managementbe.model.User;
 import com.nnkd.managementbe.repository.UserRepository;
 import lombok.AccessLevel;
@@ -12,7 +15,12 @@ import org.springframework.stereotype.Service;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +43,31 @@ public class UserService {
                 .build();
 
         return userRepository.save(user);
+    }
+
+    public User register(UserCreationRequest request, String code) {
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Email has already been used");
+        }
+        User user = new User().builder()
+                .email(request.getEmail())
+                .username(request.getUsername())
+                .password(hashPassword(request.getPassword()))
+                .code(code)
+                .date(LocalDateTime.now())
+                .build();
+
+        return userRepository.save(user);
+    }
+
+    public ApiResponse<VerifyCodeResponse> verifyCode(VerifyCodeRequest request) {
+        User user = userRepository.findUserByEmail(request.getEmail()).get();
+        if (user == null)
+            throw new NoSuchElementException("No user found: "+request.getEmail());
+        boolean valid = user.getCode().equals(request.getCode()) && user.getDate().isAfter(LocalDateTime.now());
+        ApiResponse apiResponse = new ApiResponse<>();
+        apiResponse.setResult(VerifyCodeResponse.builder().valid(valid).build());
+        return apiResponse;
     }
 
     public User getUserById(String id) {
@@ -71,5 +104,16 @@ public class UserService {
             return null;
         }
     }
+
+
+    public String randomCodeVerify() {
+        Random random = new Random();
+        String result = "";
+        for (int i = 0; i < 6; i++) {
+            result += (random.nextInt(9) + 1);
+        }
+        return result;
+    }
+
 
 }

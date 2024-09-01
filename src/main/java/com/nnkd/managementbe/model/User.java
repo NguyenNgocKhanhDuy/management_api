@@ -5,6 +5,9 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @Document(collection = "user")
 @Data
 @Builder
@@ -17,4 +20,6 @@ public class User {
     String email;
     String username;
     String password;
+    String code;
+    LocalDateTime date;
 }

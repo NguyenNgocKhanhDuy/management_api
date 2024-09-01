@@ -2,6 +2,7 @@ package com.nnkd.managementbe.controller;
 
 import com.nnkd.managementbe.dto.request.ApiResponse;
 import com.nnkd.managementbe.dto.request.MailSendRequest;
+import com.nnkd.managementbe.dto.request.UserCreationRequest;
 import com.nnkd.managementbe.service.MailService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -19,4 +20,6 @@ public class MailController {
     ApiResponse sendMail(@RequestBody MailSendRequest request) {
          return mailService.sendMail(request);
     }
+
+
 }

@@ -3,7 +3,9 @@ package com.nnkd.managementbe.controller;
 import com.nnkd.managementbe.dto.request.ApiResponse;
 import com.nnkd.managementbe.dto.request.UserCreationRequest;
 import com.nnkd.managementbe.dto.request.UserUpdateRequest;
+import com.nnkd.managementbe.dto.request.VerifyCodeRequest;
 import com.nnkd.managementbe.model.User;
+import com.nnkd.managementbe.service.MailService;
 import com.nnkd.managementbe.service.UserService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -19,6 +21,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE,makeFinal = true)
 public class UserController {
     UserService userService;
+    MailService mailService;
 
     @GetMapping
     public ApiResponse<List<User>> getAllUsers() {
@@ -32,6 +35,20 @@ public class UserController {
         ApiResponse<User> apiResponse = new ApiResponse<>();
         apiResponse.setResult(userService.save(request));
         return apiResponse;
+    }
+
+    @PostMapping("/register")
+    public ApiResponse register(@Valid @RequestBody UserCreationRequest request) {
+        String code = userService.randomCodeVerify();
+        User user = userService.register(request, code);
+        ApiResponse apiResponse = mailService.sendCodeVerify(request, code);
+        apiResponse.setStatus(user != null && apiResponse.isStatus());
+        return apiResponse;
+    }
+
+    @PostMapping("/verifyCode")
+    public ApiResponse register(@RequestBody VerifyCodeRequest request) {
+        return userService.verifyCode(request);
     }
 
     @GetMapping("/{userId}")

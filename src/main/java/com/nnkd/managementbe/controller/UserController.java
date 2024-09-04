@@ -48,10 +48,10 @@ public class UserController {
         return userService.verifyCode(request);
     }
 
-    @PostMapping("/resendVerifyCode")
-    public ApiResponse resendVerifyCode(@RequestBody VerifyCodeRequest request) {
+    @PostMapping("/sendCodeToUser")
+    public ApiResponse sendCodeToUser(@RequestBody VerifyCodeRequest request) {
         String code = userService.randomCodeVerify();
-        User user = userService.resendVerifyCode(request, code);
+        User user = userService.sendCodeToUser(request.getEmail(), code);
         ApiResponse apiResponse = mailService.sendCodeVerify(UserCreationRequest.builder().email(request.getEmail()).build(), code);
         apiResponse.setStatus(user != null && apiResponse.isStatus());
         return apiResponse;
@@ -63,6 +63,8 @@ public class UserController {
         apiResponse.setResult(userService.updateUserPassword(request));
         return apiResponse;
     }
+
+
 
     @GetMapping("/{userId}")
     public ApiResponse<User> getUserById(@PathVariable String userId) {

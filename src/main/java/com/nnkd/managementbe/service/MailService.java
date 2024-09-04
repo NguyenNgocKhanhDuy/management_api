@@ -60,5 +60,25 @@ public class MailService {
         return apiResponse;
     }
 
+    public ApiResponse sendCodeUser(String email, String code) {
+
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        MimeMessageHelper helper = null;
+        ApiResponse apiResponse = new ApiResponse();
+        try {
+            helper = new MimeMessageHelper(mimeMessage, true);
+            helper.setTo(email);
+            helper.setSubject("Verify Email");
+            helper.setText("Your Code is: "+code, false);
+
+            mailSender.send(mimeMessage);
+            apiResponse.setResult("Mail sent successfully!");
+        } catch (MessagingException e) {
+            throw new MailSendException(e.getMessage());
+        }
+
+        return apiResponse;
+    }
+
 
 }

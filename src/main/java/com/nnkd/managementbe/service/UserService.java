@@ -67,10 +67,10 @@ public class UserService {
         return apiResponse;
     }
 
-    public User resendVerifyCode(VerifyCodeRequest request, String code) {
-        User user = userRepository.findUserByEmail(request.getEmail()).get();
+    public User sendCodeToUser(String email, String code) {
+        User user = userRepository.findUserByEmail(email).get();
         if (user == null)
-            throw new NoSuchElementException("No user found: "+request.getEmail());
+            throw new NoSuchElementException("No user found: "+email);
         user.setCode(code);
         user.setDate(LocalDateTime.now());
         return userRepository.save(user);

@@ -44,7 +44,7 @@ public class UserController {
     }
 
     @PostMapping("/verifyCode")
-    public ApiResponse register(@RequestBody VerifyCodeRequest request) {
+    public ApiResponse verifyCode(@RequestBody VerifyCodeRequest request) {
         return userService.verifyCode(request);
     }
 

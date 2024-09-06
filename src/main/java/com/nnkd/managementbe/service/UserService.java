@@ -12,8 +12,11 @@ import org.springframework.stereotype.Service;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.chrono.ChronoLocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -43,9 +46,8 @@ public class UserService {
     }
 
     public User register(UserCreationRequest request, String code) {
-        if (userRepository.existsByEmail(request.getEmail())) {
+        if (userRepository.existsByEmail(request.getEmail()))
             throw new RuntimeException("Email has already been used");
-        }
         User user = new User().builder()
                 .email(request.getEmail())
                 .username(request.getUsername())
@@ -58,22 +60,26 @@ public class UserService {
     }
 
     public ApiResponse<VerifyCodeResponse> verifyCode(VerifyCodeRequest request) {
-        User user = userRepository.findUserByEmail(request.getEmail()).get();
-        if (user == null)
+        try {
+            User user = userRepository.findUserByEmail(request.getEmail()).get();
+            boolean valid = user.getCode().equals(request.getCode()) && LocalDateTime.now().isBefore(user.getDate().plus(1, ChronoUnit.HOURS));
+            ApiResponse apiResponse = new ApiResponse<>();
+            apiResponse.setResult(VerifyCodeResponse.builder().valid(valid).build());
+            return apiResponse;
+        }catch (NoSuchElementException e) {
             throw new NoSuchElementException("No user found: "+request.getEmail());
-        boolean valid = user.getCode().equals(request.getCode()) && user.getDate().isAfter(LocalDateTime.now());
-        ApiResponse apiResponse = new ApiResponse<>();
-        apiResponse.setResult(VerifyCodeResponse.builder().valid(valid).build());
-        return apiResponse;
+        }
     }
 
     public User sendCodeToUser(String email, String code) {
-        User user = userRepository.findUserByEmail(email).get();
-        if (user == null)
+        try {
+            User user = userRepository.findUserByEmail(email).get();
+            user.setCode(code);
+            user.setDate(LocalDateTime.now());
+            return userRepository.save(user);
+        }catch (NoSuchElementException e) {
             throw new NoSuchElementException("No user found: "+email);
-        user.setCode(code);
-        user.setDate(LocalDateTime.now());
-        return userRepository.save(user);
+        }
     }
 
     public User updateUserPassword(UserUpdatePasswordRequest request) {

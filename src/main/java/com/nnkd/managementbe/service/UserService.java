@@ -8,6 +8,7 @@ import com.nnkd.managementbe.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
@@ -31,6 +32,15 @@ public class UserService {
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
+    }
+    public ApiResponse getUserById(String id) {
+        try {
+            ApiResponse apiResponse = new ApiResponse();
+            apiResponse.setResult(userRepository.findById(id).get());
+            return apiResponse;
+        }catch (NoSuchElementException e) {
+            throw new NoSuchElementException("No user found: "+id);
+        }
     }
 
     public User register(UserCreationRequest request, String code) {

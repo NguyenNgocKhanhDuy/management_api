@@ -19,6 +19,7 @@ public class User {
     String id;
     String email;
     String username;
+    String avatar;
     String password;
     String code;
     LocalDateTime date;

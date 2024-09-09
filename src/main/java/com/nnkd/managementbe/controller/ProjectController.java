@@ -30,8 +30,8 @@ public class ProjectController {
         return apiResponse;
     }
 
-    @GetMapping("/projectsOfUser")
-    public ApiResponse getProjectsOfUser(@RequestHeader("Authorization") String authorizationHeader) {
+    @GetMapping("/projectsHasUser")
+    public ApiResponse getProjectsHasUser(@RequestHeader("Authorization") String authorizationHeader) {
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             String token = authorizationHeader.substring(7);
             boolean isValid = authenticationService.verifyToken(token);

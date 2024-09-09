@@ -31,6 +31,21 @@ public class UserController {
         return apiResponse;
     }
 
+    @GetMapping("/{id}")
+    public ApiResponse getUserById(@PathVariable("id") String id, @RequestHeader("Authorization") String authorizationHeader) {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String token = authorizationHeader.substring(7);
+            boolean isValid = authenticationService.verifyToken(token);
+            if (isValid) {
+                return userService.getUserById(id);
+            } else {
+                throw new RuntimeException("Invalid token");
+            }
+        } else {
+            throw new RuntimeException("Authorization header is missing or malformed");
+        }
+    }
+
     @PostMapping("/register")
     public ApiResponse register(@Valid @RequestBody UserCreationRequest request) {
         String code = userService.randomCodeVerify();

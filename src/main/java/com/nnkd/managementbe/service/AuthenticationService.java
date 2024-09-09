@@ -1,17 +1,13 @@
 package com.nnkd.managementbe.service;
 
 import com.nimbusds.jose.*;
-import com.nimbusds.jose.crypto.Ed25519Verifier;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nnkd.managementbe.dto.request.ApiResponse;
 import com.nnkd.managementbe.dto.request.AuthenticationRequest;
-import com.nnkd.managementbe.dto.request.IntrospectRequest;
 import com.nnkd.managementbe.dto.response.AuthenticationResponse;
-import com.nnkd.managementbe.dto.response.IntrospectResponse;
-import com.nnkd.managementbe.model.User;
 import com.nnkd.managementbe.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +25,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.NoSuchElementException;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
@@ -42,21 +37,6 @@ public class AuthenticationService {
     @Value("${spring.signerKey}")
     protected String SIGNER_KEY;
 
-    public ApiResponse<IntrospectResponse> introspect(IntrospectRequest request) throws JOSEException, ParseException {
-        var token = request.getToken();
-
-        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
-
-        SignedJWT signedJWT = SignedJWT.parse(token);
-
-        Date expirationTime = signedJWT.getJWTClaimsSet().getExpirationTime();
-
-        var verified = signedJWT.verify(verifier);
-        ApiResponse<IntrospectResponse> apiResponse = new ApiResponse<>();
-        apiResponse.setResult(IntrospectResponse.builder().valid(verified && expirationTime.after(new Date())).build());
-
-        return apiResponse;
-    }
 
     public ApiResponse<AuthenticationResponse> authenticate(AuthenticationRequest request) {
         var user = userRepository.findUserByEmail(request.getEmail());
@@ -75,6 +55,39 @@ public class AuthenticationService {
         apiResponse.setResult(AuthenticationResponse.builder().token(token).build());
 
         return apiResponse;
+    }
+
+    public boolean verifyToken(String token)  {
+        try {
+            JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+            SignedJWT signedJWT = SignedJWT.parse(token);
+            Date expirationTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+            var verified = signedJWT.verify(verifier);
+            return verified && expirationTime.after(new Date());
+        } catch (JOSEException e) {
+            return false;
+        } catch (ParseException e) {
+            return false;
+        }
+    }
+
+    public JWTClaimsSet extractClaims(String token) {
+        try {
+            SignedJWT signedJWT = SignedJWT.parse(token);
+            return signedJWT.getJWTClaimsSet();
+        }catch (ParseException e) {
+            throw new RuntimeException("Invalid JWT token");
+        }
+    }
+
+    public String getEmailFromextractClaims(String token) {
+        try {
+            SignedJWT signedJWT = SignedJWT.parse(token);
+            JWTClaimsSet jwtClaimsSet = signedJWT.getJWTClaimsSet();
+            return jwtClaimsSet.getSubject();
+        }catch (ParseException e) {
+            throw new RuntimeException("Invalid JWT token");
+        }
     }
 
     private String generateToken(String email) {

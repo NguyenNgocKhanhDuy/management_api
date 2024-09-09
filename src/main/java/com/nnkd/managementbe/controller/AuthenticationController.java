@@ -3,9 +3,7 @@ package com.nnkd.managementbe.controller;
 import com.nimbusds.jose.JOSEException;
 import com.nnkd.managementbe.dto.request.ApiResponse;
 import com.nnkd.managementbe.dto.request.AuthenticationRequest;
-import com.nnkd.managementbe.dto.request.IntrospectRequest;
 import com.nnkd.managementbe.dto.response.AuthenticationResponse;
-import com.nnkd.managementbe.dto.response.IntrospectResponse;
 import com.nnkd.managementbe.service.AuthenticationService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -29,9 +27,5 @@ public class AuthenticationController {
         return authenticationService.authenticate(request);
     }
 
-    @PostMapping("/introspect")
-    public ApiResponse<IntrospectResponse> authenticate(@RequestBody IntrospectRequest request) throws ParseException, JOSEException {
-        return authenticationService.introspect(request);
-    }
 
 }

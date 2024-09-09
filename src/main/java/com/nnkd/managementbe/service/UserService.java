@@ -1,5 +1,6 @@
 package com.nnkd.managementbe.service;
 
+import com.nimbusds.jwt.JWTClaimsSet;
 import com.nnkd.managementbe.dto.request.*;
 import com.nnkd.managementbe.dto.response.VerifyCodeResponse;
 import com.nnkd.managementbe.model.User;
@@ -32,19 +33,6 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public User save(UserCreationRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email has already been used");
-        }
-        User user = new User().builder()
-                .email(request.getEmail())
-                .username(request.getUsername())
-                .password(hashPassword(request.getPassword()))
-                .build();
-
-        return userRepository.save(user);
-    }
-
     public User register(UserCreationRequest request, String code) {
         if (userRepository.existsByEmail(request.getEmail()))
             throw new RuntimeException("Email has already been used");
@@ -66,8 +54,8 @@ public class UserService {
             ApiResponse apiResponse = new ApiResponse<>();
             apiResponse.setResult(VerifyCodeResponse.builder().valid(valid).build());
             return apiResponse;
-        }catch (NoSuchElementException e) {
-            throw new NoSuchElementException("No user found: "+request.getEmail());
+        } catch (NoSuchElementException e) {
+            throw new NoSuchElementException("No user found: " + request.getEmail());
         }
     }
 
@@ -77,43 +65,24 @@ public class UserService {
             user.setCode(code);
             user.setDate(LocalDateTime.now());
             return userRepository.save(user);
-        }catch (NoSuchElementException e) {
-            throw new NoSuchElementException("No user found: "+email);
+        } catch (NoSuchElementException e) {
+            throw new NoSuchElementException("No user found: " + email);
         }
     }
 
     public User updateUserPassword(UserUpdatePasswordRequest request) {
         User user = userRepository.findUserByEmail(request.getEmail()).get();
         if (user == null)
-            throw new NoSuchElementException("No user found: "+request.getEmail());
+            throw new NoSuchElementException("No user found: " + request.getEmail());
         user.setPassword(hashPassword(request.getPassword()));
         return userRepository.save(user);
     }
 
-    public User getUserById(String id) {
-        return userRepository.findById(id).orElse(null);
+    public User getUser(String email) {
+        return userRepository.findUserByEmail(email).get();
     }
 
-
-    public User updateUser(String userId, UserUpdateRequest request){
-        User user = getUserById(userId);
-        if (user == null) {
-            throw new RuntimeException("User not found: "+userId);
-        }
-        user.setUsername(request.getUsername());
-        user.setPassword(request.getPassword());
-        return userRepository.save(user);
-    }
-
-    public void deleteUser(String userId) {
-        if (userRepository.existsById(userId)) {
-            userRepository.deleteById(userId);
-        } else {
-            throw new RuntimeException("User not found: "+userId);
-        }
-    }
-
-    public String hashPassword(String password){
+    public String hashPassword(String password) {
         try {
             MessageDigest sha256 = null;
             sha256 = MessageDigest.getInstance("SHA-256");

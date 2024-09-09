@@ -1,7 +1,9 @@
 package com.nnkd.managementbe.controller;
 
+import com.nimbusds.jose.JOSEException;
 import com.nnkd.managementbe.dto.request.*;
 import com.nnkd.managementbe.model.User;
+import com.nnkd.managementbe.service.AuthenticationService;
 import com.nnkd.managementbe.service.MailService;
 import com.nnkd.managementbe.service.UserService;
 import jakarta.validation.Valid;
@@ -10,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
 import java.util.List;
 
 @RestController
@@ -19,18 +22,12 @@ import java.util.List;
 public class UserController {
     UserService userService;
     MailService mailService;
+    AuthenticationService authenticationService;
 
     @GetMapping
     public ApiResponse<List<User>> getAllUsers() {
         ApiResponse<List<User>> apiResponse = new ApiResponse<>();
         apiResponse.setResult(userService.getAllUsers());
-        return apiResponse;
-    }
-
-    @PostMapping
-    public ApiResponse<User> createUser(@Valid @RequestBody UserCreationRequest request) {
-        ApiResponse<User> apiResponse = new ApiResponse<>();
-        apiResponse.setResult(userService.save(request));
         return apiResponse;
     }
 
@@ -64,27 +61,21 @@ public class UserController {
         return apiResponse;
     }
 
-
-
-    @GetMapping("/{userId}")
-    public ApiResponse<User> getUserById(@PathVariable String userId) {
-        ApiResponse<User> apiResponse = new ApiResponse<>();
-        apiResponse.setResult(userService.getUserById(userId));
-        return apiResponse;
-    }
-
-    @PutMapping("/{userId}")
-    public ApiResponse<User> updateUser(@PathVariable String userId, UserUpdateRequest request) {
-        ApiResponse apiResponse = new ApiResponse();
-        apiResponse.setResult(userService.updateUser(userId, request));
-        return apiResponse;
-    }
-
-    @DeleteMapping("/{userId}")
-    public ApiResponse<User> deleteUser(@PathVariable String userId) {
-        ApiResponse apiResponse = new ApiResponse();
-        userService.deleteUser(userId);
-        return apiResponse;
+    @GetMapping("/user")
+    public ApiResponse getUser(@RequestHeader("Authorization") String authorizationHeader) {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String token = authorizationHeader.substring(7);
+            boolean isValid = authenticationService.verifyToken(token);
+            if (isValid) {
+                ApiResponse apiResponse = new ApiResponse();
+                apiResponse.setResult(userService.getUser(authenticationService.getEmailFromextractClaims(token)));
+                return apiResponse;
+            } else {
+                throw new RuntimeException("Invalid token");
+            }
+        } else {
+            throw new RuntimeException("Authorization header is missing or malformed");
+        }
     }
 
 }

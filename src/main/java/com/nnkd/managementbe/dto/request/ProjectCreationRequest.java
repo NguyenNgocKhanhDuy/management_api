@@ -2,6 +2,7 @@ package com.nnkd.managementbe.dto.request;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.bson.types.ObjectId;
 
 import java.time.LocalDateTime;
 
@@ -13,5 +14,5 @@ import java.time.LocalDateTime;
 public class ProjectCreationRequest {
     String name;
     LocalDateTime date;
-    String creator;
+    ObjectId creator;
 }

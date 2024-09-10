@@ -8,17 +8,20 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Document(collection = "project")
+@Document(collection = "task")
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Project {
+public class Task {
     @Id
     String id;
     String name;
     LocalDateTime date;
     String creator;
     List<String> members;
+    LocalDateTime deadline;
+    int status;
+    String project;
 }

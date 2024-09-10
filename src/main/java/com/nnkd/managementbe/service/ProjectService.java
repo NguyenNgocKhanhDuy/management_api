@@ -1,5 +1,6 @@
 package com.nnkd.managementbe.service;
 
+import com.nnkd.managementbe.dto.request.ProjectCreationRequest;
 import com.nnkd.managementbe.model.Project;
 import com.nnkd.managementbe.repository.ProjectRepository;
 import lombok.AccessLevel;
@@ -24,4 +25,8 @@ public class ProjectService {
         return projectRepository.findByCreatorOrMembers(id);
     }
 
+    public Project addProject(ProjectCreationRequest request) {
+        Project project = Project.builder().name(request.getName()).creator(request.getCreator()).date(request.getDate()).build();
+        return projectRepository.save(project);
+    }
 }

@@ -1,4 +1,4 @@
-package com.nnkd.managementbe.model;
+package com.nnkd.managementbe.model.task;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Task {
+public class TaskResponse {
     @Id
     String id;
     String name;

@@ -1,7 +1,7 @@
-package com.nnkd.managementbe.service;
+package com.nnkd.managementbe.service.task;
 
-import com.nnkd.managementbe.model.Task;
-import com.nnkd.managementbe.repository.TaskRepository;
+import com.nnkd.managementbe.model.task.TaskResponse;
+import com.nnkd.managementbe.repository.task.TaskResponseRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -9,15 +9,14 @@ import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-public class TaskService {
-    TaskRepository taskRepository;
+public class TaskResponseService {
+    TaskResponseRepository taskRepository;
 
-    public List<Task> getTasksOfProject(ObjectId id) {
+    public List<TaskResponse> getTasksOfProject(ObjectId id) {
         return taskRepository.findByProject(id);
     }
 }

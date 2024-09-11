@@ -2,7 +2,7 @@ package com.nnkd.managementbe.controller;
 
 import com.nnkd.managementbe.dto.request.ApiResponse;
 import com.nnkd.managementbe.service.AuthenticationService;
-import com.nnkd.managementbe.service.TaskService;
+import com.nnkd.managementbe.service.task.TaskResponseService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class TaskController {
-    TaskService taskService;
+    TaskResponseService taskResponseService;
     AuthenticationService authenticationService;
 
     @GetMapping("/tasksOfProject/{idProject}")
@@ -25,7 +25,7 @@ public class TaskController {
             if (isValid) {
                 ApiResponse apiResponse = new ApiResponse();
                 ObjectId id = new ObjectId(idProject);
-                apiResponse.setResult(taskService.getTasksOfProject(id));
+                apiResponse.setResult(taskResponseService.getTasksOfProject(id));
                 return apiResponse;
             }else {
                 throw new RuntimeException("Invalid token");

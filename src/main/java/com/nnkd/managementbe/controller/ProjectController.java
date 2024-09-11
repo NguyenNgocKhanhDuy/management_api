@@ -2,6 +2,7 @@ package com.nnkd.managementbe.controller;
 
 import com.nnkd.managementbe.dto.request.ApiResponse;
 import com.nnkd.managementbe.dto.request.ProjectCreationRequest;
+import com.nnkd.managementbe.dto.request.ProjectUpdateRequest;
 import com.nnkd.managementbe.model.User;
 import com.nnkd.managementbe.service.AuthenticationService;
 import com.nnkd.managementbe.service.project.ProjectRequestService;
@@ -65,4 +66,22 @@ public class ProjectController {
             throw new RuntimeException("Authorization header is missing or malformed");
         }
     }
+
+    @PutMapping("/updateName")
+    public ApiResponse updateProjectName(@RequestHeader("Authorization") String authorizationHeader, @RequestBody ProjectUpdateRequest request) {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String token = authorizationHeader.substring(7);
+            boolean isValid = authenticationService.verifyToken(token);
+            if (isValid) {
+                ApiResponse apiResponse = new ApiResponse();
+                apiResponse.setResult(projectRequestService.updateProjectName(request));
+                return apiResponse;
+            }else {
+                throw new RuntimeException("Invalid token");
+            }
+        }else  {
+            throw new RuntimeException("Authorization header is missing or malformed");
+        }
+    }
+
 }

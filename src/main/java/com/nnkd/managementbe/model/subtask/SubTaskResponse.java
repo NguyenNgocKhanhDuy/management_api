@@ -16,7 +16,7 @@ public class SubTaskResponse {
     @Id
     String id;
     String title;
-    boolean isCompleted;
+    boolean completed;
     String task;
 
 }

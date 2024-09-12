@@ -16,7 +16,7 @@ public class SubTaskRequest {
     @Id
     ObjectId id;
     String title;
-    boolean isCompleted;
+    boolean completed;
     ObjectId task;
 
 }

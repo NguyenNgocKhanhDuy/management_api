@@ -9,6 +9,7 @@ import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -18,5 +19,14 @@ public class TaskResponseService {
 
     public List<TaskResponse> getTasksOfProject(ObjectId id) {
         return taskRepository.findByProject(id);
+    }
+
+    public TaskResponse getTaskById(String id) {
+        try {
+            TaskResponse taskResponse = taskRepository.findById(id).get();
+            return taskResponse;
+        }catch (NoSuchElementException e) {
+            throw new NoSuchElementException("No Task found: "+id);
+        }
     }
 }

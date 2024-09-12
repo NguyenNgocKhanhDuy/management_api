@@ -4,6 +4,7 @@ import com.nnkd.managementbe.dto.request.ApiResponse;
 import com.nnkd.managementbe.dto.request.ProjectCreationRequest;
 import com.nnkd.managementbe.dto.request.ProjectUpdateRequest;
 import com.nnkd.managementbe.model.User;
+import com.nnkd.managementbe.model.project.ProjectResponse;
 import com.nnkd.managementbe.service.AuthenticationService;
 import com.nnkd.managementbe.service.project.ProjectRequestService;
 import com.nnkd.managementbe.service.UserService;
@@ -75,6 +76,23 @@ public class ProjectController {
             if (isValid) {
                 ApiResponse apiResponse = new ApiResponse();
                 apiResponse.setResult(projectRequestService.updateProjectName(request));
+                return apiResponse;
+            }else {
+                throw new RuntimeException("Invalid token");
+            }
+        }else  {
+            throw new RuntimeException("Authorization header is missing or malformed");
+        }
+    }
+
+    @GetMapping("/{id}")
+    public ApiResponse getProjectById(@RequestHeader("Authorization") String authorizationHeader, @PathVariable("id") String id) {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String token = authorizationHeader.substring(7);
+            boolean isValid = authenticationService.verifyToken(token);
+            if (isValid) {
+                ApiResponse apiResponse = new ApiResponse();
+                apiResponse.setResult(projectResponseService.getProjectById(id));
                 return apiResponse;
             }else {
                 throw new RuntimeException("Invalid token");

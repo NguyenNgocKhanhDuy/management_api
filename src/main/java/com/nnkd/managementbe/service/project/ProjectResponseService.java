@@ -12,6 +12,7 @@ import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +22,15 @@ public class ProjectResponseService {
 
     public List<ProjectResponse> getProjectsHasUser(ObjectId id) {
         return projectRepository.findByCreatorOrMembers(id);
+    }
+
+    public ProjectResponse getProjectById(String id) {
+        try {
+            ProjectResponse projectResponse = projectRepository.findById(id).get();
+            return projectResponse;
+        } catch (NoSuchElementException e) {
+            throw new NoSuchElementException("No project found: " + id);
+        }
     }
 
 }

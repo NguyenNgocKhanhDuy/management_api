@@ -34,4 +34,21 @@ public class TaskController {
             throw new RuntimeException("Authorization header is missing or malformed");
         }
     }
+
+    @GetMapping("/{id}")
+    public ApiResponse getTaskById(@RequestHeader("Authorization") String authorizationHeader, @PathVariable("id") String id) {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String token = authorizationHeader.substring(7);
+            boolean isValid = authenticationService.verifyToken(token);
+            if (isValid) {
+                ApiResponse apiResponse = new ApiResponse();
+                apiResponse.setResult(taskResponseService.getTaskById(id));
+                return apiResponse;
+            }else {
+                throw new RuntimeException("Invalid token");
+            }
+        }else {
+            throw new RuntimeException("Authorization header is missing or malformed");
+        }
+    }
 }

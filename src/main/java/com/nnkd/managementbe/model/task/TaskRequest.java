@@ -2,6 +2,7 @@ package com.nnkd.managementbe.model.task;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -14,15 +15,15 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class TaskResponse {
+public class TaskRequest {
     @Id
     String id;
     String name;
     LocalDateTime date;
-    String creator;
-    List<String> members;
+    ObjectId creator;
+    List<ObjectId> members;
     LocalDateTime deadline;
     String status;
     int position;
-    String project;
+    ObjectId project;
 }

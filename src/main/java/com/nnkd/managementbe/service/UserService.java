@@ -80,6 +80,11 @@ public class UserService {
         }
     }
 
+    public List<User> searchUsersByEmail(String partialEmail) {
+        return userRepository.findUserByEmailContaining(partialEmail);
+    }
+
+
     public User updateUserPassword(UserUpdatePasswordRequest request) {
         User user = userRepository.findUserByEmail(request.getEmail()).get();
         if (user == null)

@@ -93,4 +93,21 @@ public class UserController {
         }
     }
 
+    @GetMapping("/search")
+    public ApiResponse getUser(@RequestHeader("Authorization") String authorizationHeader, @RequestParam String email) {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String token = authorizationHeader.substring(7);
+            boolean isValid = authenticationService.verifyToken(token);
+            if (isValid) {
+                ApiResponse apiResponse = new ApiResponse();
+                apiResponse.setResult(userService.searchUsersByEmail(email));
+                return apiResponse;
+            } else {
+                throw new RuntimeException("Invalid token");
+            }
+        } else {
+            throw new RuntimeException("Authorization header is missing or malformed");
+        }
+    }
+
 }

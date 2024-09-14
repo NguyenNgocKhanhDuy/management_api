@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface TaskResponseRepository extends MongoRepository<TaskResponse, String> {
     List<TaskResponse> findByProject(ObjectId id);
+    List<TaskResponse> findByStatus(String status);
 }

@@ -29,4 +29,8 @@ public class TaskResponseService {
             throw new NoSuchElementException("No Task found: "+id);
         }
     }
+
+    public List<TaskResponse> getTaskByStatus(String status) {
+        return taskRepository.findByStatus(status).stream().toList();
+    }
 }

@@ -22,4 +22,5 @@ public class ProjectRequest {
     LocalDateTime date;
     ObjectId creator;
     List<ObjectId> members;
+    List<ObjectId> pending;
 }

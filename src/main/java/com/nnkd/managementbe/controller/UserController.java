@@ -6,6 +6,7 @@ import com.nnkd.managementbe.model.User;
 import com.nnkd.managementbe.service.AuthenticationService;
 import com.nnkd.managementbe.service.MailService;
 import com.nnkd.managementbe.service.UserService;
+import com.nnkd.managementbe.service.project.ProjectResponseService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/users")
@@ -23,6 +25,7 @@ public class UserController {
     UserService userService;
     MailService mailService;
     AuthenticationService authenticationService;
+    ProjectResponseService projectResponseService;
 
     @GetMapping
     public ApiResponse<List<User>> getAllUsers() {
@@ -94,13 +97,35 @@ public class UserController {
     }
 
     @GetMapping("/search")
-    public ApiResponse getUser(@RequestHeader("Authorization") String authorizationHeader, @RequestParam String email) {
+    public ApiResponse searchUser(@RequestHeader("Authorization") String authorizationHeader, @RequestParam String email) {
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             String token = authorizationHeader.substring(7);
             boolean isValid = authenticationService.verifyToken(token);
             if (isValid) {
                 ApiResponse apiResponse = new ApiResponse();
                 apiResponse.setResult(userService.searchUsersByEmail(email));
+                return apiResponse;
+            } else {
+                throw new RuntimeException("Invalid token");
+            }
+        } else {
+            throw new RuntimeException("Authorization header is missing or malformed");
+        }
+    }
+
+    @GetMapping("/searchNotInProject")
+    public ApiResponse searchUserNotInProject(@RequestHeader("Authorization") String authorizationHeader, @RequestParam String email, String idProject) {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String token = authorizationHeader.substring(7);
+            boolean isValid = authenticationService.verifyToken(token);
+            List<String> members = projectResponseService.getProjectById(idProject).getMembers();
+            List<String> pending = projectResponseService.getProjectById(idProject).getPending();
+            members.addAll(pending);
+            if (isValid) {
+                List<User> all = userService.searchUsersByEmail(email);
+                List<User> filter = all.stream().filter(user -> !members.contains(user.getId())).collect(Collectors.toList());
+                ApiResponse apiResponse = new ApiResponse();
+                apiResponse.setResult(filter);
                 return apiResponse;
             } else {
                 throw new RuntimeException("Invalid token");

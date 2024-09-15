@@ -22,4 +22,5 @@ public class ProjectResponse {
     LocalDateTime date;
     String creator;
     List<String> members;
+    List<String> pending;
 }

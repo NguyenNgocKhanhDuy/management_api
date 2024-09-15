@@ -1,5 +1,6 @@
 package com.nnkd.managementbe.service.project;
 
+import com.nnkd.managementbe.dto.request.ApiResponse;
 import com.nnkd.managementbe.dto.request.ProjectCreationRequest;
 import com.nnkd.managementbe.dto.request.ProjectUpdateRequest;
 import com.nnkd.managementbe.model.project.ProjectRequest;
@@ -31,6 +32,28 @@ public class ProjectRequestService {
             return projectRepository.save(projectRequest);
         }catch (NoSuchElementException e) {
             throw new NoSuchElementException("No Project has id: "+request.getId());
+        }
+    }
+
+    public ProjectRequest updateProjectMembers(ProjectUpdateRequest request) {
+        try {
+            ProjectRequest projectRequest = projectRepository.findById(request.getId()).get();
+            projectRequest.setMembers(request.getMembers());
+            return projectRepository.save(projectRequest);
+        }catch (NoSuchElementException e) {
+            throw new NoSuchElementException("No Project has id: "+request.getId());
+        }
+    }
+
+    public ApiResponse deleteProject(String id) {
+        try {
+            projectRepository.findById(id);
+            projectRepository.deleteById(id);
+            ApiResponse apiResponse = new ApiResponse();
+            apiResponse.setResult("Delete Successfully");
+            return apiResponse;
+        }catch (NoSuchElementException e) {
+            throw new NoSuchElementException("No subtask found: " + id);
         }
     }
 }

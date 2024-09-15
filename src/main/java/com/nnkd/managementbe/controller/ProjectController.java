@@ -27,6 +27,23 @@ public class ProjectController {
     ProjectResponseService projectResponseService;
     AuthenticationService authenticationService;
 
+    @GetMapping("/{id}")
+    public ApiResponse getProjectById(@RequestHeader("Authorization") String authorizationHeader, @PathVariable("id") String id) {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String token = authorizationHeader.substring(7);
+            boolean isValid = authenticationService.verifyToken(token);
+            if (isValid) {
+                ApiResponse apiResponse = new ApiResponse();
+                apiResponse.setResult(projectResponseService.getProjectById(id));
+                return apiResponse;
+            }else {
+                throw new RuntimeException("Invalid token");
+            }
+        }else  {
+            throw new RuntimeException("Authorization header is missing or malformed");
+        }
+    }
+
     @GetMapping("/projectsHasUser")
     public ApiResponse getProjectsHasUser(@RequestHeader("Authorization") String authorizationHeader) {
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
@@ -85,15 +102,30 @@ public class ProjectController {
         }
     }
 
-    @GetMapping("/{id}")
-    public ApiResponse getProjectById(@RequestHeader("Authorization") String authorizationHeader, @PathVariable("id") String id) {
+    @PutMapping("/updateMembers")
+    public ApiResponse updateProjectMembers(@RequestHeader("Authorization") String authorizationHeader, @RequestBody ProjectUpdateRequest request) {
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             String token = authorizationHeader.substring(7);
             boolean isValid = authenticationService.verifyToken(token);
             if (isValid) {
                 ApiResponse apiResponse = new ApiResponse();
-                apiResponse.setResult(projectResponseService.getProjectById(id));
+                apiResponse.setResult(projectRequestService.updateProjectMembers(request));
                 return apiResponse;
+            }else {
+                throw new RuntimeException("Invalid token");
+            }
+        }else  {
+            throw new RuntimeException("Authorization header is missing or malformed");
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ApiResponse deleteProject(@RequestHeader("Authorization") String authorizationHeader, @PathVariable("id") String id) {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String token = authorizationHeader.substring(7);
+            boolean isValid = authenticationService.verifyToken(token);
+            if (isValid) {
+                return projectRequestService.deleteProject(id);
             }else {
                 throw new RuntimeException("Invalid token");
             }

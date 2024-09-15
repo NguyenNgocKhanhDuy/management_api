@@ -4,6 +4,8 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.bson.types.ObjectId;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -12,4 +14,5 @@ import org.bson.types.ObjectId;
 public class ProjectUpdateRequest {
     String id;
     String name;
+    List<ObjectId> members;
 }

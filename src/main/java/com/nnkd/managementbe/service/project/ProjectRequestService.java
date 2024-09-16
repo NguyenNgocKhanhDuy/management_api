@@ -45,6 +45,16 @@ public class ProjectRequestService {
         }
     }
 
+    public ProjectRequest updateProjectPending(ProjectUpdateRequest request) {
+        try {
+            ProjectRequest projectRequest = projectRepository.findById(request.getId()).get();
+            projectRequest.setPending(request.getPending());
+            return projectRepository.save(projectRequest);
+        }catch (NoSuchElementException e) {
+            throw new NoSuchElementException("No Project has id: "+request.getId());
+        }
+    }
+
     public ApiResponse deleteProject(String id) {
         try {
             projectRepository.findById(id);

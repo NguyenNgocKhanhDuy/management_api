@@ -36,7 +36,8 @@ public class UserService {
     public ApiResponse getUserById(String id) {
         try {
             ApiResponse apiResponse = new ApiResponse();
-            apiResponse.setResult(userRepository.findById(id).get());
+            User user = userRepository.findById(id).get();
+            apiResponse.setResult(user);
             return apiResponse;
         }catch (NoSuchElementException e) {
             throw new NoSuchElementException("No user found: "+id);

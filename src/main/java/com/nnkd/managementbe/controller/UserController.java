@@ -14,6 +14,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -118,12 +119,19 @@ public class UserController {
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             String token = authorizationHeader.substring(7);
             boolean isValid = authenticationService.verifyToken(token);
+            String creator = projectResponseService.getProjectById(idProject).getCreator();
+            List<String> except = new ArrayList<>();
             List<String> members = projectResponseService.getProjectById(idProject).getMembers();
             List<String> pending = projectResponseService.getProjectById(idProject).getPending();
-            members.addAll(pending);
+            except.add(creator);
+            if (members != null) {
+                except.addAll(members);
+            } else if (pending != null) {
+                except.addAll(pending);
+            }
             if (isValid) {
                 List<User> all = userService.searchUsersByEmail(email);
-                List<User> filter = all.stream().filter(user -> !members.contains(user.getId())).collect(Collectors.toList());
+                List<User> filter = all.stream().filter(user -> !except.contains(user.getId())).collect(Collectors.toList());
                 ApiResponse apiResponse = new ApiResponse();
                 apiResponse.setResult(filter);
                 return apiResponse;

@@ -15,4 +15,6 @@ public class ProjectUpdateRequest {
     String id;
     String name;
     List<ObjectId> members;
+    List<ObjectId> pending;
+
 }

@@ -119,6 +119,23 @@ public class ProjectController {
         }
     }
 
+    @PutMapping("/updatePending")
+    public ApiResponse updateProjectPending(@RequestHeader("Authorization") String authorizationHeader, @RequestBody ProjectUpdateRequest request) {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String token = authorizationHeader.substring(7);
+            boolean isValid = authenticationService.verifyToken(token);
+            if (isValid) {
+                ApiResponse apiResponse = new ApiResponse();
+                apiResponse.setResult(projectRequestService.updateProjectPending(request));
+                return apiResponse;
+            }else {
+                throw new RuntimeException("Invalid token");
+            }
+        }else  {
+            throw new RuntimeException("Authorization header is missing or malformed");
+        }
+    }
+
     @DeleteMapping("/{id}")
     public ApiResponse deleteProject(@RequestHeader("Authorization") String authorizationHeader, @PathVariable("id") String id) {
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {

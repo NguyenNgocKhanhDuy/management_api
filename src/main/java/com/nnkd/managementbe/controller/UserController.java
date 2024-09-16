@@ -41,7 +41,9 @@ public class UserController {
             String token = authorizationHeader.substring(7);
             boolean isValid = authenticationService.verifyToken(token);
             if (isValid) {
-                return userService.getUserById(id);
+                ApiResponse apiResponse = new ApiResponse();
+                apiResponse.setResult(userService.getUserById(id));
+                return apiResponse;
             } else {
                 throw new RuntimeException("Invalid token");
             }

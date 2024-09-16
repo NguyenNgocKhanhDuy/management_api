@@ -33,12 +33,10 @@ public class UserService {
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
-    public ApiResponse getUserById(String id) {
+    public User getUserById(String id) {
         try {
-            ApiResponse apiResponse = new ApiResponse();
             User user = userRepository.findById(id).get();
-            apiResponse.setResult(user);
-            return apiResponse;
+            return user;
         }catch (NoSuchElementException e) {
             throw new NoSuchElementException("No user found: "+id);
         }

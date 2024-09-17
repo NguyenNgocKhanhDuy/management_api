@@ -128,7 +128,8 @@ public class UserController {
             except.add(creator);
             if (members != null) {
                 except.addAll(members);
-            } else if (pending != null) {
+            }
+            if (pending != null) {
                 except.addAll(pending);
             }
             if (isValid) {

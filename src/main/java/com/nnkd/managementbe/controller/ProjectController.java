@@ -191,4 +191,23 @@ public class ProjectController {
         }
     }
 
+    @GetMapping("/search")
+    public ApiResponse search(@RequestHeader("Authorization") String authorizationHeader, @RequestParam String projectName) {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String token = authorizationHeader.substring(7);
+            boolean isValid = authenticationService.verifyToken(token);
+            if (isValid) {
+                ApiResponse apiResponse = new ApiResponse();
+                String email = authenticationService.getEmailFromextractClaims(token);
+                User user = userService.getUser(email);
+                apiResponse.setResult(projectResponseService.searchProjectByName(new ObjectId(user.getId()), projectName));
+                return apiResponse;
+            }else {
+                throw new RuntimeException("Invalid token");
+            }
+        }else  {
+            throw new RuntimeException("Authorization header is missing or malformed");
+        }
+    }
+
 }

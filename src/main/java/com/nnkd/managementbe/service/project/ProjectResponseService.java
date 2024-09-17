@@ -33,4 +33,8 @@ public class ProjectResponseService {
         }
     }
 
+    public List<ProjectResponse> searchProjectByName(ObjectId id, String projectName) {
+        return projectRepository.findByNameContainingAndCreatorOrMembers(id, projectName);
+    }
+
 }

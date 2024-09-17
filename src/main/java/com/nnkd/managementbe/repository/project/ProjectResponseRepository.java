@@ -13,4 +13,10 @@ import java.util.List;
 public interface ProjectResponseRepository extends MongoRepository<ProjectResponse, String> {
     @Query("{ '$or': [ { 'creator': ?0 }, { 'members': ?0 } ] }")
     List<ProjectResponse> findByCreatorOrMembers(ObjectId id);
+
+    @Query("{ '$and': [ { 'name': { '$regex': ?1, '$options': 'i' } }, { '$or': [ { 'creator': ?0 }, { 'members': ?0 } ] } ] }")
+    List<ProjectResponse> findByNameContainingAndCreatorOrMembers(ObjectId id, String projectName);
+
+
+
 }

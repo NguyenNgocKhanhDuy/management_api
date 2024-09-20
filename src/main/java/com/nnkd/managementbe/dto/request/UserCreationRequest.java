@@ -16,4 +16,5 @@ public class UserCreationRequest {
     String username;
     @PasswordConstraint
     String password;
+    String avatar;
 }

@@ -37,4 +37,8 @@ public class ProjectResponseService {
         return projectRepository.findByNameContainingAndCreatorOrMembers(id, projectName);
     }
 
+    public List<ProjectResponse> getProjectHasPendingUser(ObjectId id) {
+        return projectRepository.findByPending(id);
+    }
+
 }

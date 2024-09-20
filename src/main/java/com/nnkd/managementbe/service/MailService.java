@@ -28,7 +28,7 @@ public class MailService {
             helper = new MimeMessageHelper(mimeMessage, true);
             helper.setTo(request.getTo());
             helper.setSubject(request.getSubject());
-            helper.setText(request.getSubject(), false);
+            helper.setText(request.getText(), false);
 
             mailSender.send(mimeMessage);
             apiResponse.setResult("Mail sent successfully!");

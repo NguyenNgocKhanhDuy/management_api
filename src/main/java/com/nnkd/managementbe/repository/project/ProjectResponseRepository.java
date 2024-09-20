@@ -17,6 +17,7 @@ public interface ProjectResponseRepository extends MongoRepository<ProjectRespon
     @Query("{ '$and': [ { 'name': { '$regex': ?1, '$options': 'i' } }, { '$or': [ { 'creator': ?0 }, { 'members': ?0 } ] } ] }")
     List<ProjectResponse> findByNameContainingAndCreatorOrMembers(ObjectId id, String projectName);
 
+    List<ProjectResponse> findByPending(Object id);
 
 
 }

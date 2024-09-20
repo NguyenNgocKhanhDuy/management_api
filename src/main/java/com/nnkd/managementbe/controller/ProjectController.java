@@ -5,6 +5,7 @@ import com.nnkd.managementbe.dto.request.MailSendRequest;
 import com.nnkd.managementbe.dto.request.ProjectCreationRequest;
 import com.nnkd.managementbe.dto.request.ProjectUpdateRequest;
 import com.nnkd.managementbe.model.User;
+import com.nnkd.managementbe.model.project.ProjectRequest;
 import com.nnkd.managementbe.model.project.ProjectResponse;
 import com.nnkd.managementbe.service.AuthenticationService;
 import com.nnkd.managementbe.service.MailService;
@@ -87,6 +88,25 @@ public class ProjectController {
                 throw new RuntimeException("Invalid token");
             }
         }else {
+            throw new RuntimeException("Authorization header is missing or malformed");
+        }
+    }
+
+    @GetMapping("/projectHasPendingUser")
+    public ApiResponse projectHasPendingUser(@RequestHeader("Authorization") String authorizationHeader) {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String token = authorizationHeader.substring(7);
+            boolean isValid = authenticationService.verifyToken(token);
+            if (isValid) {
+                ApiResponse apiResponse = new ApiResponse();
+                String email = authenticationService.getEmailFromextractClaims(token);
+                User user = userService.getUser(email);
+                apiResponse.setResult(projectResponseService.getProjectHasPendingUser(new ObjectId(user.getId())));
+                return apiResponse;
+            }else {
+                throw new RuntimeException("Invalid token");
+            }
+        }else  {
             throw new RuntimeException("Authorization header is missing or malformed");
         }
     }
@@ -174,13 +194,88 @@ public class ProjectController {
                 }else {
                     filter = pendingNew;
                 }
+                User creator = userService.getUserById(projectResponse.getCreator());
                 String subject = "Invitation";
-                String text = "Invitation to project: "+projectResponse.getName();
+                String text = "Invitation to project: "+projectResponse.getName()+" from: "+creator.getUsername()+" ("+creator.getEmail()+")";
                 for (ObjectId id: filter) {
                     User user = userService.getUserById(id.toString());
                     MailSendRequest mail = MailSendRequest.builder().to(user.getEmail()).subject(subject).text(text).build();
                     mailService.sendMail(mail);
                 }
+                apiResponse.setResult(projectRequestService.updateProjectPending(request));
+                return apiResponse;
+            }else {
+                throw new RuntimeException("Invalid token");
+            }
+        }else  {
+            throw new RuntimeException("Authorization header is missing or malformed");
+        }
+    }
+
+    @PutMapping("/userAcceptPending")
+    public ApiResponse userAcceptPending(@RequestHeader("Authorization") String authorizationHeader, @RequestBody ProjectUpdateRequest request) {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String token = authorizationHeader.substring(7);
+            boolean isValid = authenticationService.verifyToken(token);
+            if (isValid) {
+                ApiResponse apiResponse = new ApiResponse();
+                ProjectResponse projectResponse = projectResponseService.getProjectById(request.getId());
+
+                List<String> pendingOld = projectResponse.getPending();
+                String email = authenticationService.getEmailFromextractClaims(token);
+
+                User user = userService.getUser(email);
+
+                List<ObjectId> pendingOldObjectId = pendingOld.stream().map(id -> new ObjectId(id)).collect(Collectors.toList());
+                List<ObjectId> pendingNew = pendingOldObjectId.stream().filter(id -> !id.toString().equals(user.getId())).collect(Collectors.toList());
+
+                List<String> members = projectResponse.getMembers();
+
+                List<ObjectId> membersObjectId = new ArrayList<>();
+                if (members != null) {
+                    membersObjectId = members.stream().map(id -> new ObjectId(id)).collect(Collectors.toList());
+                }
+
+                membersObjectId.add(new ObjectId(user.getId()));
+                request.setMembers(membersObjectId);
+                request.setPending(pendingNew);
+
+                ProjectRequest updatePending = projectRequestService.updateProjectPending(request);
+                ProjectRequest updateMember = projectRequestService.updateProjectMembers(request);
+
+                apiResponse.setResult(updatePending != null && updateMember != null);
+                return apiResponse;
+            }else {
+                throw new RuntimeException("Invalid token");
+            }
+        }else  {
+            throw new RuntimeException("Authorization header is missing or malformed");
+        }
+    }
+
+    @PutMapping("/userRejectPending")
+    public ApiResponse userRejectPending(@RequestHeader("Authorization") String authorizationHeader, @RequestBody ProjectUpdateRequest request) {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String token = authorizationHeader.substring(7);
+            boolean isValid = authenticationService.verifyToken(token);
+            if (isValid) {
+                ApiResponse apiResponse = new ApiResponse();
+                ProjectResponse projectResponse = projectResponseService.getProjectById(request.getId());
+                List<String> pendingOld = projectResponse.getPending();
+                String email = authenticationService.getEmailFromextractClaims(token);
+                User user = userService.getUser(email);
+
+                List<ObjectId> pendingOldObjectId = pendingOld.stream().map(id -> new ObjectId(id)).collect(Collectors.toList());
+                List<ObjectId> pendingNew = pendingOldObjectId.stream().filter(id -> !id.toString().equals(user.getId())).collect(Collectors.toList());
+                request.setPending(pendingNew);
+
+                User creator = userService.getUserById(projectResponse.getCreator());
+                String subject = "Reject invitation";
+
+                String text = "User: "+user.getUsername()+" ("+email+")"+", rejected your invitation";
+
+                MailSendRequest mail = MailSendRequest.builder().to(creator.getEmail()).subject(subject).text(text).build();
+                mailService.sendMail(mail);
                 apiResponse.setResult(projectRequestService.updateProjectPending(request));
                 return apiResponse;
             }else {

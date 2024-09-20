@@ -1,6 +1,5 @@
 package com.nnkd.managementbe.service;
 
-import com.nimbusds.jwt.JWTClaimsSet;
 import com.nnkd.managementbe.dto.request.*;
 import com.nnkd.managementbe.dto.response.VerifyCodeResponse;
 import com.nnkd.managementbe.model.User;
@@ -8,18 +7,13 @@ import com.nnkd.managementbe.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.Instant;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.chrono.ChronoLocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
@@ -49,6 +43,7 @@ public class UserService {
                 .email(request.getEmail())
                 .username(request.getUsername())
                 .password(hashPassword(request.getPassword()))
+                .avatar(generateAvatar(request.getUsername()))
                 .code(code)
                 .date(LocalDateTime.now())
                 .build();
@@ -84,17 +79,40 @@ public class UserService {
     }
 
 
-    public User updateUserPassword(UserUpdatePasswordRequest request) {
-        User user = userRepository.findUserByEmail(request.getEmail()).get();
-        if (user == null)
+    public User updateUserPassword(UserUpdateRequest request) {
+        try {
+            User user = userRepository.findUserByEmail(request.getEmail()).get();
+            user.setPassword(hashPassword(request.getPassword()));
+            return userRepository.save(user);
+        }catch (NoSuchElementException e) {
             throw new NoSuchElementException("No user found: " + request.getEmail());
-        user.setPassword(hashPassword(request.getPassword()));
-        return userRepository.save(user);
+        }
     }
 
     public User getUser(String email) {
         return userRepository.findUserByEmail(email).get();
     }
+
+    public User updateUserAvatar(UserUpdateRequest request) {
+        try {
+            User user = userRepository.findUserByEmail(request.getEmail()).get();
+            user.setAvatar(request.getAvatar());
+            return userRepository.save(user);
+        }catch (NoSuchElementException e) {
+            throw new NoSuchElementException("No user found: " + request.getEmail());
+        }
+    }
+
+    public User updateUserUsername(UserUpdateRequest request) {
+        try {
+            User user = userRepository.findUserByEmail(request.getEmail()).get();
+            user.setUsername(request.getUsername());
+            return userRepository.save(user);
+        }catch (NoSuchElementException e) {
+            throw new NoSuchElementException("No user found: " + request.getEmail());
+        }
+    }
+
 
     public String hashPassword(String password) {
         try {
@@ -116,6 +134,11 @@ public class UserService {
             result += (random.nextInt(9) + 1);
         }
         return result;
+    }
+
+    public String generateAvatar(String username) {
+        String firstLetter = username.substring(0, 1);
+        return "https://ui-avatars.com/api/?name="+firstLetter+"&background=random";
     }
 
 

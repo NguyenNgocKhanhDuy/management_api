@@ -177,8 +177,8 @@ public class ProjectController {
         }
     }
 
-    @PutMapping("/addMemberPending")
-    public ApiResponse addMemberPending(@RequestHeader("Authorization") String authorizationHeader, @RequestBody ProjectUpdateRequest request) {
+    @PutMapping("/addUserIntoPending")
+    public ApiResponse addUserIntoPending(@RequestHeader("Authorization") String authorizationHeader, @RequestBody ProjectUpdateRequest request) {
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             String token = authorizationHeader.substring(7);
             boolean isValid = authenticationService.verifyToken(token);

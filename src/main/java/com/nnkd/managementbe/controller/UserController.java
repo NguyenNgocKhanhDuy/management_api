@@ -73,7 +73,7 @@ public class UserController {
         return apiResponse;
     }
 
-    @PostMapping("/updatePassword")
+    @PutMapping("/updatePassword")
     public ApiResponse updatePassword(@RequestBody UserUpdateRequest request) {
         ApiResponse apiResponse = new ApiResponse();
         apiResponse.setResult(userService.updateUserPassword(request));
@@ -162,23 +162,23 @@ public class UserController {
         }
     }
 
-    @PutMapping("/updatePassAuth")
-    public ApiResponse updatePasswordAuth(@RequestHeader("Authorization") String authorizationHeader, @RequestBody UserUpdateRequest request) {
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            String token = authorizationHeader.substring(7);
-            boolean isValid = authenticationService.verifyToken(token);
-            if (isValid) {
-                ApiResponse apiResponse = new ApiResponse();
-                request.setEmail(authenticationService.getEmailFromextractClaims(token));
-                apiResponse.setResult(userService.updateUserPassword(request));
-                return apiResponse;
-            } else {
-                throw new RuntimeException("Invalid token");
-            }
-        } else {
-            throw new RuntimeException("Authorization header is missing or malformed");
-        }
-    }
+//    @PutMapping("/updatePassAuth")
+//    public ApiResponse updatePasswordAuth(@RequestHeader("Authorization") String authorizationHeader, @RequestBody UserUpdateRequest request) {
+//        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+//            String token = authorizationHeader.substring(7);
+//            boolean isValid = authenticationService.verifyToken(token);
+//            if (isValid) {
+//                ApiResponse apiResponse = new ApiResponse();
+//                request.setEmail(authenticationService.getEmailFromextractClaims(token));
+//                apiResponse.setResult(userService.updateUserPassword(request));
+//                return apiResponse;
+//            } else {
+//                throw new RuntimeException("Invalid token");
+//            }
+//        } else {
+//            throw new RuntimeException("Authorization header is missing or malformed");
+//        }
+//    }
 
     @PutMapping("/updateUsername")
     public ApiResponse updateUsername(@RequestHeader("Authorization") String authorizationHeader, @RequestBody UserUpdateRequest request) {

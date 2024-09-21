@@ -108,22 +108,22 @@ public class TaskController {
         }
     }
 
-    @PutMapping("/updateTaskStatus")
-    public ApiResponse updateTaskStatus(@RequestHeader("Authorization") String authorizationHeader, @RequestBody TaskUpdateRequest request) {
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            String token = authorizationHeader.substring(7);
-            boolean isValid = authenticationService.verifyToken(token);
-            if (isValid) {
-                ApiResponse apiResponse = new ApiResponse();
-                apiResponse.setResult(taskRequestService.updateTaskStatus(request));
-                return apiResponse;
-            }else {
-                throw new RuntimeException("Invalid token");
-            }
-        }else {
-            throw new RuntimeException("Authorization header is missing or malformed");
-        }
-    }
+////    @PutMapping("/updateTaskStatus")
+////    public ApiResponse updateTaskStatus(@RequestHeader("Authorization") String authorizationHeader, @RequestBody TaskUpdateRequest request) {
+////        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+////            String token = authorizationHeader.substring(7);
+////            boolean isValid = authenticationService.verifyToken(token);
+////            if (isValid) {
+////                ApiResponse apiResponse = new ApiResponse();
+////                apiResponse.setResult(taskRequestService.updateTaskStatus(request));
+////                return apiResponse;
+////            }else {
+////                throw new RuntimeException("Invalid token");
+////            }
+////        }else {
+////            throw new RuntimeException("Authorization header is missing or malformed");
+////        }
+//    }
 
     @PutMapping("/updateTaskName")
     public ApiResponse updateTaskName(@RequestHeader("Authorization") String authorizationHeader, @RequestBody TaskUpdateRequest request) {

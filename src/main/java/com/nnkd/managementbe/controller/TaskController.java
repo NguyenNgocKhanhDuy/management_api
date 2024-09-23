@@ -1,11 +1,14 @@
 package com.nnkd.managementbe.controller;
 
 import com.nnkd.managementbe.dto.request.ApiResponse;
+import com.nnkd.managementbe.dto.request.LogCreationRequest;
 import com.nnkd.managementbe.dto.request.TaskCreationRequest;
 import com.nnkd.managementbe.dto.request.TaskUpdateRequest;
 import com.nnkd.managementbe.model.User;
+import com.nnkd.managementbe.model.task.TaskResponse;
 import com.nnkd.managementbe.service.AuthenticationService;
 import com.nnkd.managementbe.service.UserService;
+import com.nnkd.managementbe.service.log.LogRequestService;
 import com.nnkd.managementbe.service.task.TaskRequestService;
 import com.nnkd.managementbe.service.task.TaskResponseService;
 import lombok.AccessLevel;
@@ -25,6 +28,7 @@ public class TaskController {
     TaskRequestService  taskRequestService;
     AuthenticationService authenticationService;
     UserService userService;
+    LogRequestService logRequestService;
 
     @GetMapping("/tasksOfProject/{idProject}")
     public ApiResponse getTasksOfProject(@RequestHeader("Authorization") String authorizationHeader, @PathVariable("idProject") String idProject) {
@@ -71,6 +75,14 @@ public class TaskController {
                 String email = authenticationService.getEmailFromextractClaims(token);
                 User user = userService.getUser(email);
                 int position = taskResponseService.getTaskByStatus("todo").size();
+
+                String action = "Add Task "+request.getName();
+                LogCreationRequest logCreationRequest = LogCreationRequest.builder()
+                        .action(action)
+                        .user(new ObjectId(user.getId()))
+                        .project(request.getProject()).build();
+                logRequestService.addLog(logCreationRequest);
+
                 apiResponse.setResult(taskRequestService.addTask(request, new ObjectId(user.getId()), position));
                 return apiResponse;
             }else {
@@ -89,8 +101,19 @@ public class TaskController {
             boolean isValid = authenticationService.verifyToken(token);
             if (isValid) {
                 ApiResponse apiResponse = new ApiResponse();
+                User user = userService.getUser(authenticationService.getEmailFromextractClaims(token));
+
                 try {
                     for (TaskUpdateRequest re : request) {
+                        TaskResponse taskResponse = taskResponseService.getTaskById(re.getId());
+                        if (taskResponse.getStatus() != re.getStatus()) {
+                            String action = "Move Task "+taskResponse.getName() +" From "+taskResponse.getStatus()+" To "+re.getStatus();
+                            LogCreationRequest logCreationRequest = LogCreationRequest.builder()
+                                    .action(action)
+                                    .user(new ObjectId(user.getId()))
+                                    .project(new ObjectId(taskResponse.getProject())).build();
+                            logRequestService.addLog(logCreationRequest);
+                        }
                         taskRequestService.updateTaskStatusAndPosition(re);
                     }
                     apiResponse.setStatus(true);
@@ -132,6 +155,17 @@ public class TaskController {
             boolean isValid = authenticationService.verifyToken(token);
             if (isValid) {
                 ApiResponse apiResponse = new ApiResponse();
+                User user = userService.getUser(authenticationService.getEmailFromextractClaims(token));
+
+                TaskResponse taskResponse = taskResponseService.getTaskById(request.getId());
+
+                String action = "Update Task Name From "+request.getName() +" To "+taskResponse.getName();
+                LogCreationRequest logCreationRequest = LogCreationRequest.builder()
+                        .action(action)
+                        .user(new ObjectId(user.getId()))
+                        .project(new ObjectId(taskResponse.getProject())).build();
+                logRequestService.addLog(logCreationRequest);
+
                 apiResponse.setResult(taskRequestService.updateTaskName(request));
                 return apiResponse;
             }else {
@@ -148,6 +182,14 @@ public class TaskController {
             String token = authorizationHeader.substring(7);
             boolean isValid = authenticationService.verifyToken(token);
             if (isValid) {
+                User user = userService.getUser(authenticationService.getEmailFromextractClaims(token));
+                TaskResponse taskResponse = taskResponseService.getTaskById(id);
+                String action = "Delete Task "+taskResponse.getName();
+                LogCreationRequest logCreationRequest = LogCreationRequest.builder()
+                        .action(action)
+                        .user(new ObjectId(user.getId()))
+                        .project(new ObjectId(taskResponse.getProject())).build();
+                logRequestService.addLog(logCreationRequest);
                 return taskRequestService.deleteTask(id);
             }else {
                 throw new RuntimeException("Invalid token");

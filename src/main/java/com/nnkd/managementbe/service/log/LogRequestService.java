@@ -20,6 +20,7 @@ public class LogRequestService {
         LogRequest logRequest = LogRequest.builder()
                 .action(request.getAction())
                 .user(request.getUser())
+                .dateTime(LocalDateTime.now())
                 .project(request.getProject()).build();
         return repository.save(logRequest);
     }

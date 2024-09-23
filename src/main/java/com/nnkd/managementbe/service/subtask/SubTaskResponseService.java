@@ -24,5 +24,14 @@ public class SubTaskResponseService {
         return subTaskResponseRepository.findByTask(id);
     }
 
+    public SubTaskResponse getSubTaskById(String id) {
+        try {
+            SubTaskResponse subTaskResponse = subTaskResponseRepository.findById(id).get();
+            return subTaskResponse;
+        }catch(NoSuchElementException e) {
+            throw new NoSuchElementException("No subtask found: "+id);
+        }
+    }
+
 
 }

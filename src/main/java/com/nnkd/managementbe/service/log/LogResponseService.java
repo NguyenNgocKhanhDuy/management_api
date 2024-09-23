@@ -18,6 +18,6 @@ public class LogResponseService {
     LogResponseRepository repository;
 
     public List<LogResponse> getLogsOfProject(ObjectId id) {
-        return repository.findByProjectId(id).stream().toList();
+        return repository.findAllByProject(id).stream().toList();
     }
 }

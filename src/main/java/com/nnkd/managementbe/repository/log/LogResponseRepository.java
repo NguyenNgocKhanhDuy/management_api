@@ -9,5 +9,5 @@ import java.util.List;
 
 @Repository
 public interface LogResponseRepository extends MongoRepository<LogResponse, String> {
-    List<LogResponse> findByProjectId(ObjectId projectId);
+    List<LogResponse> findAllByProject(ObjectId projectId);
 }

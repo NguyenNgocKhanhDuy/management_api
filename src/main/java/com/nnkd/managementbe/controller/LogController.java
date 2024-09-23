@@ -24,7 +24,7 @@ public class LogController {
             boolean isValid = authenticationService.verifyToken(token);
             if (isValid) {
                 ApiResponse apiResponse = new ApiResponse();
-                apiResponse.setResult(logResponseService.getLogsOfProject(new ObjectId(id)));
+                apiResponse.setResult(logResponseService.getLogsOfProject((new ObjectId(id))));
                 return apiResponse;
             }else {
                 throw new RuntimeException("Invalid token");

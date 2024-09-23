@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -18,7 +20,6 @@ public class LogRequestService {
         LogRequest logRequest = LogRequest.builder()
                 .action(request.getAction())
                 .user(request.getUser())
-                .dateTime(request.getDateTime())
                 .project(request.getProject()).build();
         return repository.save(logRequest);
     }

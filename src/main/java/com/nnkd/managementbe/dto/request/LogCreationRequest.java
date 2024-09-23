@@ -14,6 +14,5 @@ import java.time.LocalDateTime;
 public class LogCreationRequest {
     String action;
     ObjectId user;
-    LocalDateTime dateTime;
     ObjectId project;
 }

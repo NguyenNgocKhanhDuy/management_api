@@ -1,14 +1,12 @@
 package com.nnkd.managementbe.controller;
 
-import com.nnkd.managementbe.dto.request.ApiResponse;
-import com.nnkd.managementbe.dto.request.MailSendRequest;
-import com.nnkd.managementbe.dto.request.ProjectCreationRequest;
-import com.nnkd.managementbe.dto.request.ProjectUpdateRequest;
+import com.nnkd.managementbe.dto.request.*;
 import com.nnkd.managementbe.model.User;
 import com.nnkd.managementbe.model.project.ProjectRequest;
 import com.nnkd.managementbe.model.project.ProjectResponse;
 import com.nnkd.managementbe.service.AuthenticationService;
 import com.nnkd.managementbe.service.MailService;
+import com.nnkd.managementbe.service.log.LogRequestService;
 import com.nnkd.managementbe.service.project.ProjectRequestService;
 import com.nnkd.managementbe.service.UserService;
 import com.nnkd.managementbe.service.project.ProjectResponseService;
@@ -33,6 +31,7 @@ public class ProjectController {
     ProjectResponseService projectResponseService;
     AuthenticationService authenticationService;
     MailService mailService;
+    LogRequestService logRequestService;
 
     @GetMapping("/{id}")
     public ApiResponse getProjectById(@RequestHeader("Authorization") String authorizationHeader, @PathVariable("id") String id) {
@@ -117,7 +116,14 @@ public class ProjectController {
             String token = authorizationHeader.substring(7);
             boolean isValid = authenticationService.verifyToken(token);
             if (isValid) {
+                User user = userService.getUser(authenticationService.getEmailFromextractClaims(token));
                 ApiResponse apiResponse = new ApiResponse();
+                String action = "Updated project name to " + request.getName();
+                LogCreationRequest logCreationRequest = LogCreationRequest.builder()
+                        .action(action)
+                        .user(new ObjectId(user.getId()))
+                        .project(new ObjectId(request.getId())).build();
+                logRequestService.addLog(logCreationRequest);
                 apiResponse.setResult(projectRequestService.updateProjectName(request));
                 return apiResponse;
             }else {
@@ -242,6 +248,13 @@ public class ProjectController {
 
                 ProjectRequest updatePending = projectRequestService.updateProjectPending(request);
                 ProjectRequest updateMember = projectRequestService.updateProjectMembers(request);
+
+                String action = "Joined the project";
+                LogCreationRequest logCreationRequest = LogCreationRequest.builder()
+                        .action(action)
+                        .user(new ObjectId(user.getId()))
+                        .project(new ObjectId(request.getId())).build();
+                logRequestService.addLog(logCreationRequest);
 
                 apiResponse.setResult(updatePending != null && updateMember != null);
                 return apiResponse;

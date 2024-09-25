@@ -26,4 +26,5 @@ public class TaskRequest {
     String status;
     int position;
     ObjectId project;
+    boolean send;
 }

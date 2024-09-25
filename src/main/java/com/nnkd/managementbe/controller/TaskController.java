@@ -2,21 +2,26 @@ package com.nnkd.managementbe.controller;
 
 import com.nnkd.managementbe.dto.request.*;
 import com.nnkd.managementbe.model.User;
+import com.nnkd.managementbe.model.project.ProjectResponse;
 import com.nnkd.managementbe.model.task.TaskResponse;
 import com.nnkd.managementbe.service.AuthenticationService;
 import com.nnkd.managementbe.service.MailService;
 import com.nnkd.managementbe.service.UserService;
 import com.nnkd.managementbe.service.log.LogRequestService;
+import com.nnkd.managementbe.service.project.ProjectResponseService;
 import com.nnkd.managementbe.service.task.TaskRequestService;
 import com.nnkd.managementbe.service.task.TaskResponseService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.bson.types.ObjectId;
+import org.springframework.cglib.core.Local;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
+import java.time.*;
+import java.time.chrono.ChronoLocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @RestController
@@ -29,6 +34,7 @@ public class TaskController {
     AuthenticationService authenticationService;
     UserService userService;
     LogRequestService logRequestService;
+    ProjectResponseService projectResponseService;
     MailService mailService;
 
     @GetMapping("/tasksOfProject/{idProject}")
@@ -203,14 +209,38 @@ public class TaskController {
     @Scheduled(fixedRate = 60000)
     public void checkTaskDeadline() {
         List<TaskResponse> tasks = taskResponseService.getAlls();
-        LocalDateTime now = LocalDateTime.now();
 
-        MailSendRequest mailSendRequest = MailSendRequest
-                .builder()
-                .to("21130035@st.hcmuaf.edu.vn").text("Schedule").subject("Time").build();
+        Instant nowUtc = Instant.now();
+        LocalDateTime nowLocal = LocalDateTime.ofInstant(nowUtc, ZoneId.of("UTC+7"));
+
+
         for (TaskResponse task : tasks) {
-            if (task.getDeadline().isBefore(now)) {
+            Instant deadline = task.getDeadline();
+
+            if (deadline.minus(Duration.ofHours(24)).isBefore(nowLocal.toInstant(ZoneOffset.UTC)) && !task.isSend()) {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy, HH:mm")
+                        .withZone(ZoneId.of("UTC"));
+
+                ProjectResponse project = projectResponseService.getProjectById(task.getProject());
+                User user = userService.getUserById(task.getCreator());
+
+                String subject = String.format("Reminder: Task \"%s\" Deadline Approaching", task.getName());
+
+
+                String text = String.format("Dear User,\n\nThis is a reminder that the deadline for your task \"%s\" is approaching in less than 24 hours.\n\n" +
+                                "**Task in Project:** %s\n" +
+                                "- **Task Name:** %s\n" +
+                                "- **Deadline:** %s UTC\n\n" +
+                                "Please ensure that you complete the task before the deadline.\n\n" +
+                                "Best regards,\nNNKD",
+                        task.getName(), project.getName(), task.getName(), formatter.format(deadline));
+
+                MailSendRequest mailSendRequest = MailSendRequest
+                        .builder()
+                        .to(user.getEmail()).text(text).subject(subject).build();
+
                 mailService.sendMail(mailSendRequest);
+                taskRequestService.updateSendMailDeadline(task.getId());
             }
         }
     }

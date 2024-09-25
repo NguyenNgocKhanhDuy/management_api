@@ -5,6 +5,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -21,8 +22,9 @@ public class TaskResponse {
     LocalDateTime date;
     String creator;
     List<String> members;
-    LocalDateTime deadline;
+    Instant deadline;
     String status;
     int position;
     String project;
+    boolean send;
 }

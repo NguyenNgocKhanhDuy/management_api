@@ -73,6 +73,16 @@ public class TaskRequestService {
         }
     }
 
+    public TaskRequest updateSendMailDeadline(String id) {
+        try {
+            TaskRequest taskRequest = taskRepository.findById(id).get();
+            taskRequest.setSend(true);
+            return taskRepository.save(taskRequest);
+        }catch (NoSuchElementException e) {
+            throw new NoSuchElementException("Task not found: "+id);
+        }
+    }
+
     public ApiResponse deleteTask(String id) {
         try {
             TaskRequest taskRequest = taskRepository.findById(id).get();

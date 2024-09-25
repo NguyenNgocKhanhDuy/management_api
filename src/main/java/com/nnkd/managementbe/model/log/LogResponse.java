@@ -18,6 +18,7 @@ public class LogResponse {
     String id;
     String action;
     String user;
+    String task;
     LocalDateTime dateTime;
     String project;
 }

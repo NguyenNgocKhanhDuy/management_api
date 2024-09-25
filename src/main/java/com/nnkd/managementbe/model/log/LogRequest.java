@@ -19,6 +19,7 @@ public class LogRequest {
     String id;
     String action;
     ObjectId user;
+    ObjectId task;
     LocalDateTime dateTime;
     ObjectId project;
 }

@@ -1,12 +1,10 @@
 package com.nnkd.managementbe.controller;
 
-import com.nnkd.managementbe.dto.request.ApiResponse;
-import com.nnkd.managementbe.dto.request.LogCreationRequest;
-import com.nnkd.managementbe.dto.request.TaskCreationRequest;
-import com.nnkd.managementbe.dto.request.TaskUpdateRequest;
+import com.nnkd.managementbe.dto.request.*;
 import com.nnkd.managementbe.model.User;
 import com.nnkd.managementbe.model.task.TaskResponse;
 import com.nnkd.managementbe.service.AuthenticationService;
+import com.nnkd.managementbe.service.MailService;
 import com.nnkd.managementbe.service.UserService;
 import com.nnkd.managementbe.service.log.LogRequestService;
 import com.nnkd.managementbe.service.task.TaskRequestService;
@@ -15,8 +13,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.bson.types.ObjectId;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -29,6 +29,7 @@ public class TaskController {
     AuthenticationService authenticationService;
     UserService userService;
     LogRequestService logRequestService;
+    MailService mailService;
 
     @GetMapping("/tasksOfProject/{idProject}")
     public ApiResponse getTasksOfProject(@RequestHeader("Authorization") String authorizationHeader, @PathVariable("idProject") String idProject) {
@@ -106,7 +107,7 @@ public class TaskController {
                 try {
                     for (TaskUpdateRequest re : request) {
                         TaskResponse taskResponse = taskResponseService.getTaskById(re.getId());
-                        if (taskResponse.getStatus() != re.getStatus()) {
+                        if (taskResponse.getStatus().toString().trim() != re.getStatus().toString().trim()) {
                             String action = "Move Task "+taskResponse.getName() +" From "+taskResponse.getStatus()+" To "+re.getStatus();
                             LogCreationRequest logCreationRequest = LogCreationRequest.builder()
                                     .action(action)
@@ -196,6 +197,21 @@ public class TaskController {
             }
         }else {
             throw new RuntimeException("Authorization header is missing or malformed");
+        }
+    }
+
+    @Scheduled(fixedRate = 60000)
+    public void checkTaskDeadline() {
+        List<TaskResponse> tasks = taskResponseService.getAlls();
+        LocalDateTime now = LocalDateTime.now();
+
+        MailSendRequest mailSendRequest = MailSendRequest
+                .builder()
+                .to("21130035@st.hcmuaf.edu.vn").text("Schedule").subject("Time").build();
+        for (TaskResponse task : tasks) {
+            if (task.getDeadline().isBefore(now)) {
+                mailService.sendMail(mailSendRequest);
+            }
         }
     }
 

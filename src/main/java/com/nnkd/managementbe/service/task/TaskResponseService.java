@@ -6,8 +6,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.bson.types.ObjectId;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -32,5 +34,9 @@ public class TaskResponseService {
 
     public List<TaskResponse> getTaskByStatus(String status) {
         return taskRepository.findByStatus(status).stream().toList();
+    }
+
+    public List<TaskResponse> getAlls() {
+        return taskRepository.findAll();
     }
 }

@@ -7,7 +7,5 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableScheduling
 public class ScheduleTime {
-    public static void main(String[] args) {
-        SpringApplication.run(ScheduleTime.class, args);
-    }
+
 }

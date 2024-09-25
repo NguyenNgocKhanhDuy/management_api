@@ -227,13 +227,13 @@ public class TaskController {
                 String subject = String.format("Reminder: Task \"%s\" Deadline Approaching", task.getName());
 
 
-                String text = String.format("Dear User,\n\nThis is a reminder that the deadline for your task \"%s\" is approaching in less than 24 hours.\n\n" +
+                String text = String.format("Dear %s,\n\nThis is a reminder that the deadline for your task \"%s\" is approaching in less than 24 hours.\n\n" +
                                 "**Task in Project:** %s\n" +
                                 "- **Task Name:** %s\n" +
                                 "- **Deadline:** %s UTC\n\n" +
                                 "Please ensure that you complete the task before the deadline.\n\n" +
                                 "Best regards,\nNNKD",
-                        task.getName(), project.getName(), task.getName(), formatter.format(deadline));
+                        user.getUsername(), task.getName(), project.getName(), task.getName(), formatter.format(deadline));
 
                 MailSendRequest mailSendRequest = MailSendRequest
                         .builder()

@@ -77,9 +77,9 @@ public class TaskRequestService {
     public TaskRequest updateTaskDeadline(TaskUpdateRequest request) {
         try {
             TaskRequest taskRequest = taskRepository.findById(request.getId()).get();
-//            if (taskRequest.isSend()) {
-//                taskRequest.setSend(false);
-//            }
+            if (taskRequest.isSend()) {
+                taskRequest.setSend(false);
+            }
             System.out.println(request.getDeadline());
             taskRequest.setDeadline(request.getDeadline().plusHours(7));
             return taskRepository.save(taskRequest);

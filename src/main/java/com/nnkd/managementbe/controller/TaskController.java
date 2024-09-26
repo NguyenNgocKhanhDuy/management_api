@@ -183,6 +183,36 @@ public class TaskController {
         }
     }
 
+    @PutMapping("/updateTaskDeadline")
+    public ApiResponse updateTaskDeadline(@RequestHeader("Authorization") String authorizationHeader, @RequestBody TaskUpdateRequest request) {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String token = authorizationHeader.substring(7);
+            boolean isValid = authenticationService.verifyToken(token);
+            if (isValid) {
+                ApiResponse apiResponse = new ApiResponse();
+                User user = userService.getUser(authenticationService.getEmailFromextractClaims(token));
+
+                TaskResponse taskResponse = taskResponseService.getTaskById(request.getId());
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy, HH:mm")
+                        .withZone(ZoneId.of("UTC"));
+
+                String action = "Update Task: "+ request.getName() +" Deadline To "+formatter.format(request.getDeadline());
+                LogCreationRequest logCreationRequest = LogCreationRequest.builder()
+                        .action(action)
+                        .user(new ObjectId(user.getId()))
+                        .project(new ObjectId(taskResponse.getProject())).build();
+                logRequestService.addLog(logCreationRequest);
+
+                apiResponse.setResult(taskRequestService.updateTaskDeadline(request));
+                return apiResponse;
+            }else {
+                throw new RuntimeException("Invalid token");
+            }
+        }else {
+            throw new RuntimeException("Authorization header is missing or malformed");
+        }
+    }
+
     @DeleteMapping("/{id}")
     public ApiResponse deleteTask(@RequestHeader("Authorization") String authorizationHeader, @PathVariable("id") String id) {
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
@@ -217,7 +247,7 @@ public class TaskController {
         for (TaskResponse task : tasks) {
             Instant deadline = task.getDeadline();
 
-            if (deadline.minus(Duration.ofHours(24)).isBefore(nowLocal.toInstant(ZoneOffset.UTC)) && !task.isSend()) {
+            if (deadline.minus(Duration.ofHours(12)).isBefore(nowLocal.toInstant(ZoneOffset.UTC)) && !task.isSend()) {
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy, HH:mm")
                         .withZone(ZoneId.of("UTC"));
 
@@ -227,7 +257,7 @@ public class TaskController {
                 String subject = String.format("Reminder: Task \"%s\" Deadline Approaching", task.getName());
 
 
-                String text = String.format("Dear %s,\n\nThis is a reminder that the deadline for your task \"%s\" is approaching in less than 24 hours.\n\n" +
+                String text = String.format("Dear %s,\n\nThis is a reminder that the deadline for your task \"%s\" is approaching in less than 12 hours.\n\n" +
                                 "**Task in Project:** %s\n" +
                                 "- **Task Name:** %s\n" +
                                 "- **Deadline:** %s\n\n" +

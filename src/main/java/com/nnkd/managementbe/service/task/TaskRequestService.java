@@ -14,6 +14,7 @@ import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -67,6 +68,20 @@ public class TaskRequestService {
         try {
             TaskRequest taskRequest = taskRepository.findById(request.getId()).get();
             taskRequest.setName(request.getName());
+            return taskRepository.save(taskRequest);
+        }catch (NoSuchElementException e) {
+            throw new NoSuchElementException("Task not found: "+request.getId());
+        }
+    }
+
+    public TaskRequest updateTaskDeadline(TaskUpdateRequest request) {
+        try {
+            TaskRequest taskRequest = taskRepository.findById(request.getId()).get();
+//            if (taskRequest.isSend()) {
+//                taskRequest.setSend(false);
+//            }
+            System.out.println(request.getDeadline());
+            taskRequest.setDeadline(request.getDeadline().plusHours(7));
             return taskRepository.save(taskRequest);
         }catch (NoSuchElementException e) {
             throw new NoSuchElementException("Task not found: "+request.getId());

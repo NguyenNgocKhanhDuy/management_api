@@ -218,7 +218,6 @@ public class TaskController {
             Instant deadline = task.getDeadline();
 
             if (deadline.minus(Duration.ofHours(24)).isBefore(nowLocal.toInstant(ZoneOffset.UTC)) && !task.isSend()) {
-                System.out.println("SEND");
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy, HH:mm")
                         .withZone(ZoneId.of("UTC"));
 
@@ -231,7 +230,7 @@ public class TaskController {
                 String text = String.format("Dear %s,\n\nThis is a reminder that the deadline for your task \"%s\" is approaching in less than 24 hours.\n\n" +
                                 "**Task in Project:** %s\n" +
                                 "- **Task Name:** %s\n" +
-                                "- **Deadline:** %s UTC\n\n" +
+                                "- **Deadline:** %s\n\n" +
                                 "Please ensure that you complete the task before the deadline.\n\n" +
                                 "Best regards,\nNNKD",
                         user.getUsername(), task.getName(), project.getName(), task.getName(), formatter.format(deadline));

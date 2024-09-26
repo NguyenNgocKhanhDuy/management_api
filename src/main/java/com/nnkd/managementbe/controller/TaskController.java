@@ -218,6 +218,7 @@ public class TaskController {
             Instant deadline = task.getDeadline();
 
             if (deadline.minus(Duration.ofHours(24)).isBefore(nowLocal.toInstant(ZoneOffset.UTC)) && !task.isSend()) {
+                System.out.println("SEND");
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy, HH:mm")
                         .withZone(ZoneId.of("UTC"));
 

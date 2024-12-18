@@ -114,7 +114,7 @@ public class TaskController {
                     for (TaskUpdateRequest re : request) {
                         TaskResponse taskResponse = taskResponseService.getTaskById(re.getId());
                         if (taskResponse.getStatus().toString().trim() != re.getStatus().toString().trim()) {
-                            String action = "Move Task "+taskResponse.getName() +" From "+taskResponse.getStatus()+" To "+re.getStatus();
+                            String action = "Move Task \""+taskResponse.getName() +"\" From "+taskResponse.getStatus()+" To "+re.getStatus();
                             LogCreationRequest logCreationRequest = LogCreationRequest.builder()
                                     .action(action)
                                     .user(new ObjectId(user.getId()))
@@ -196,7 +196,7 @@ public class TaskController {
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy, HH:mm")
                         .withZone(ZoneId.of("UTC"));
 
-                String action = "Update Task: "+ request.getName() +" Deadline To "+formatter.format(request.getDeadline());
+                String action = "Update Task \""+ taskResponse.getName() +"\" Deadline To "+formatter.format(request.getDeadline());
                 LogCreationRequest logCreationRequest = LogCreationRequest.builder()
                         .action(action)
                         .user(new ObjectId(user.getId()))

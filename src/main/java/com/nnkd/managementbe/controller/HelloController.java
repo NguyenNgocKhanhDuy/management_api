@@ -9,6 +9,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class HelloController {
     @GetMapping()
     public String hello() {
-        return "<a href=\"/swagger-ui.html\"> API </a>";
+        return "redirect:/swagger-ui.html";
     }
 }

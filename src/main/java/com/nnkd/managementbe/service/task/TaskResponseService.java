@@ -1,5 +1,6 @@
 package com.nnkd.managementbe.service.task;
 
+import com.nnkd.managementbe.model.project.ProjectResponse;
 import com.nnkd.managementbe.model.task.TaskResponse;
 import com.nnkd.managementbe.repository.task.TaskResponseRepository;
 import lombok.AccessLevel;
@@ -38,5 +39,9 @@ public class TaskResponseService {
 
     public List<TaskResponse> getAlls() {
         return taskRepository.findAll();
+    }
+
+    public List<TaskResponse> searchTaskByName(ObjectId id, String taskName) {
+        return taskRepository.findByNameContainingAndCreatorOrMembers(id, taskName);
     }
 }

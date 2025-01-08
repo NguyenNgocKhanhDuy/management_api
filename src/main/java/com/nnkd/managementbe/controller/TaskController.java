@@ -236,6 +236,25 @@ public class TaskController {
         }
     }
 
+    @GetMapping("/search")
+    public ApiResponse search(@RequestHeader("Authorization") String authorizationHeader, @RequestParam String taskName) {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String token = authorizationHeader.substring(7);
+            boolean isValid = authenticationService.verifyToken(token);
+            if (isValid) {
+                ApiResponse apiResponse = new ApiResponse();
+                String email = authenticationService.getEmailFromextractClaims(token);
+                User user = userService.getUser(email);
+                apiResponse.setResult(taskResponseService.searchTaskByName(new ObjectId(user.getId()), taskName));
+                return apiResponse;
+            }else {
+                throw new RuntimeException("Invalid token");
+            }
+        }else  {
+            throw new RuntimeException("Authorization header is missing or malformed");
+        }
+    }
+
     @Scheduled(fixedRate = 60000)
     public void checkTaskDeadline() {
         List<TaskResponse> tasks = taskResponseService.getAlls();
@@ -274,5 +293,7 @@ public class TaskController {
             }
         }
     }
+
+
 
 }

@@ -304,32 +304,34 @@ public class TaskController {
 
 
         for (TaskResponse task : tasks) {
-            Instant deadline = task.getDeadline();
+            if (!task.isSend()) {
+                Instant deadline = task.getDeadline();
 
-            if (deadline.minus(Duration.ofHours(12)).isBefore(nowLocal.toInstant(ZoneOffset.UTC)) && !task.isSend()) {
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy, HH:mm")
-                        .withZone(ZoneId.of("UTC"));
+                if (deadline.minus(Duration.ofHours(12)).isBefore(nowLocal.toInstant(ZoneOffset.UTC)) && !task.isSend()) {
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy, HH:mm")
+                            .withZone(ZoneId.of("UTC"));
 
-                ProjectResponse project = projectResponseService.getProjectById(task.getProject());
-                User user = userService.getUserById(task.getCreator());
+                    ProjectResponse project = projectResponseService.getProjectById(task.getProject());
+                    User user = userService.getUserById(task.getCreator());
 
-                String subject = String.format("Reminder: Task \"%s\" Deadline Approaching", task.getName());
+                    String subject = String.format("Reminder: Task \"%s\" Deadline Approaching", task.getName());
 
 
-                String text = String.format("Dear %s,\n\nThis is a reminder that the deadline for your task \"%s\" is approaching in less than 12 hours.\n\n" +
-                                "**Task in Project:** %s\n" +
-                                "- **Task Name:** %s\n" +
-                                "- **Deadline:** %s\n\n" +
-                                "Please ensure that you complete the task before the deadline.\n\n" +
-                                "Best regards,\nNNKD",
-                        user.getUsername(), task.getName(), project.getName(), task.getName(), formatter.format(deadline));
+                    String text = String.format("Dear %s,\n\nThis is a reminder that the deadline for your task \"%s\" is approaching in less than 12 hours.\n\n" +
+                                    "**Task in Project:** %s\n" +
+                                    "- **Task Name:** %s\n" +
+                                    "- **Deadline:** %s\n\n" +
+                                    "Please ensure that you complete the task before the deadline.\n\n" +
+                                    "Best regards,\nNNKD",
+                            user.getUsername(), task.getName(), project.getName(), task.getName(), formatter.format(deadline));
 
-                MailSendRequest mailSendRequest = MailSendRequest
-                        .builder()
-                        .to(user.getEmail()).text(text).subject(subject).build();
+                    MailSendRequest mailSendRequest = MailSendRequest
+                            .builder()
+                            .to(user.getEmail()).text(text).subject(subject).build();
 
-                mailService.sendMail(mailSendRequest);
-                taskRequestService.updateSendMailDeadline(task.getId());
+                    mailService.sendMail(mailSendRequest);
+                    taskRequestService.updateSendMailDeadline(task.getId());
+                }
             }
         }
     }

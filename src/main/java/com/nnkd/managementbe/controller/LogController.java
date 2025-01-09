@@ -14,6 +14,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.bson.types.ObjectId;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -38,6 +39,32 @@ public class LogController {
                 ApiResponse apiResponse = new ApiResponse();
 
                 List<LogResponse> logs = logResponseService.getLogsOfProject(new ObjectId(id));
+
+                for (LogResponse log : logs) {
+                    updateTaskAndSubtaskNames(log);
+                }
+
+                apiResponse.setResult(logs);
+                return apiResponse;
+            }else {
+                throw new RuntimeException("Invalid token");
+            }
+        }else {
+            throw new RuntimeException("Authorization header is missing or malformed");
+        }
+    }
+
+    @GetMapping()
+    public ApiResponse getLogsOfProjectPage(@RequestHeader("Authorization") String authorizationHeader, @RequestParam("id") String id, @RequestParam(value = "page", defaultValue = "0") int page ){
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String token = authorizationHeader.substring(7);
+            boolean isValid = authenticationService.verifyToken(token);
+            if (isValid) {
+                ApiResponse apiResponse = new ApiResponse();
+
+                Page<LogResponse> logPages = logResponseService.getLogsOfProjectPage(new ObjectId(id), page);
+
+                List<LogResponse> logs = logPages.getContent();
 
                 for (LogResponse log : logs) {
                     updateTaskAndSubtaskNames(log);

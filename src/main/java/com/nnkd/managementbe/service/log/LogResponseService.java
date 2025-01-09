@@ -1,19 +1,14 @@
 package com.nnkd.managementbe.service.log;
 
-import com.nnkd.managementbe.model.User;
 import com.nnkd.managementbe.model.log.LogResponse;
-import com.nnkd.managementbe.model.subtask.SubTaskResponse;
-import com.nnkd.managementbe.model.task.TaskResponse;
-import com.nnkd.managementbe.repository.log.LogRequestRepository;
 import com.nnkd.managementbe.repository.log.LogResponseRepository;
-import com.nnkd.managementbe.repository.task.TaskResponseRepository;
-import com.nnkd.managementbe.service.UserService;
-import com.nnkd.managementbe.service.subtask.SubTaskResponseService;
-import com.nnkd.managementbe.service.task.TaskResponseService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.bson.types.ObjectId;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,6 +22,11 @@ public class LogResponseService {
 
     public List<LogResponse> getLogsOfProject(ObjectId id) {
         return repository.findAllByProject(id).stream().toList();
+    }
+
+    public Page<LogResponse> getLogsOfProjectPage(ObjectId id, int page) {
+        Pageable pageable = PageRequest.of(page, 50);
+        return repository.findAllByProject(id, pageable);
     }
 
 

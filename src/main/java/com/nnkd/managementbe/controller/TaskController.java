@@ -99,7 +99,7 @@ public class TaskController {
                 TaskResponse taskResponse = taskResponseService.getNewTask(user.getId());
 
                 LogCreationRequest logCreationRequest = LogCreationRequest.builder()
-                        .action(String.valueOf(Action.ADD_TASK))
+                        .action(Action.ADD_TASK.getDescription())
                         .userLog(UserLog.builder().id(user.getId()).build())
                         .taskLog(TaskLog.builder().id(taskResponse.getId()).build())
                         .project(request.getProject()).build();
@@ -132,7 +132,7 @@ public class TaskController {
                         if (taskResponse.getStatus().toString().trim() != re.getStatus().toString().trim()) {
 
                             LogCreationRequest logCreationRequest = LogCreationRequest.builder()
-                                    .action(String.valueOf(Action.MOVE_TASK))
+                                    .action(Action.MOVE_TASK.getDescription())
                                     .userLog(UserLog.builder().id(user.getId()).build())
                                     .taskLog(TaskLog.builder().id(re.getId()).build())
                                     .project(new ObjectId(taskResponse.getProject())).build();
@@ -221,7 +221,7 @@ public class TaskController {
 //                        .withZone(ZoneId.of("UTC"));
 
                 LogCreationRequest logCreationRequest = LogCreationRequest.builder()
-                        .action(String.valueOf(Action.CHANGE_DEADLINE))
+                        .action(Action.CHANGE_DEADLINE.getDescription())
                         .userLog(UserLog.builder().id(user.getId()).build())
                         .taskLog(TaskLog.builder().id(taskResponse.getId()).build())
                         .project(new ObjectId(taskResponse.getProject())).build();
@@ -254,7 +254,7 @@ public class TaskController {
                 TaskResponse taskResponse = taskResponseService.getTaskById(id);
 
                 LogCreationRequest logCreationRequest = LogCreationRequest.builder()
-                        .action(String.valueOf(Action.DELETE_TASK))
+                        .action(Action.DELETE_TASK.getDescription())
                         .userLog(UserLog.builder().id(user.getId()).build())
                         .taskLog(TaskLog.builder().id(id).build())
                         .project(new ObjectId(taskResponse.getProject())).build();

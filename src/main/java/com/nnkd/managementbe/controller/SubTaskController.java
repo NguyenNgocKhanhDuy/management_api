@@ -135,6 +135,7 @@ public class SubTaskController {
 
 
                 LogCreationRequest logCreationRequest = LogCreationRequest.builder()
+                        .action(Action.MARK_SUBTASK.getDescription())
                         .userLog(UserLog.builder().id(user.getId()).build())
                         .taskLog(TaskLog.builder().id(taskResponse.getId()).build())
                         .subTaskLog(SubTaskLog.builder().id(subTaskResponse.getId()).build())

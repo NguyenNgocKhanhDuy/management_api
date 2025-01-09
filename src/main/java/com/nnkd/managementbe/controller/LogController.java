@@ -54,19 +54,26 @@ public class LogController {
     }
 
     private void updateTaskAndSubtaskNames(LogResponse log) {
-        User user = userService.getUserById(log.getUserLog().getId());
-        if (user != null) {
-            log.getUserLog().setName(user.getUsername());
+        if (log.getUserLog().getId() != null) {
+            User user = userService.getUserById(log.getUserLog().getId());
+            if (user != null) {
+                log.getUserLog().setName(user.getUsername());
+            }
         }
 
-        TaskResponse task = taskResponseService.getTaskById(log.getTaskLog().getId());
-        if (task != null) {
-            log.getTaskLog().setName(task.getName());
+        if (log.getTaskLog().getId() != null) {
+            TaskResponse task = taskResponseService.getTaskById(log.getTaskLog().getId());
+            if (task != null) {
+                log.getTaskLog().setName(task.getName());
+            }
         }
 
-        SubTaskResponse subTask = subTaskResponseService.getSubTaskById(log.getSubTaskLog().getId());
-        if (subTask != null) {
-            log.getSubTaskLog().setName(subTask.getTitle());
+
+        if (log.getSubTaskLog().getId() != null) {
+            SubTaskResponse subTask = subTaskResponseService.getSubTaskById(log.getSubTaskLog().getId());
+            if (subTask != null) {
+                log.getSubTaskLog().setName(subTask.getTitle());
+            }
         }
     }
 }

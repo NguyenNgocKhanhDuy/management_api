@@ -129,7 +129,7 @@ public class TaskController {
                 try {
                     for (TaskUpdateRequest re : request) {
                         TaskResponse taskResponse = taskResponseService.getTaskById(re.getId());
-                        if (taskResponse.getStatus().toString().trim() != re.getStatus().toString().trim()) {
+                        if (!taskResponse.getStatus().toString().trim().equals(re.getStatus().toString().trim())) {
 
                             LogCreationRequest logCreationRequest = LogCreationRequest.builder()
                                     .action(Action.MOVE_TASK.getDescription())

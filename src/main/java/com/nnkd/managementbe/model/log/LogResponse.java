@@ -17,8 +17,9 @@ public class LogResponse {
     @Id
     String id;
     String action;
-    String user;
-    String task;
+    TaskLog taskLog;
+    SubTaskLog subTaskLog;
+    UserLog userLog;
     LocalDateTime dateTime;
     String project;
 }

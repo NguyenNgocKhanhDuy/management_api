@@ -5,6 +5,10 @@ import com.nnkd.managementbe.dto.request.LogCreationRequest;
 import com.nnkd.managementbe.dto.request.SubTaskCreationRequest;
 import com.nnkd.managementbe.dto.request.SubTaskUpdateRequest;
 import com.nnkd.managementbe.model.User;
+import com.nnkd.managementbe.model.log.Action;
+import com.nnkd.managementbe.model.log.SubTaskLog;
+import com.nnkd.managementbe.model.log.TaskLog;
+import com.nnkd.managementbe.model.log.UserLog;
 import com.nnkd.managementbe.model.subtask.SubTaskResponse;
 import com.nnkd.managementbe.model.task.TaskResponse;
 import com.nnkd.managementbe.service.AuthenticationService;
@@ -14,8 +18,6 @@ import com.nnkd.managementbe.service.subtask.SubTaskRequestService;
 import com.nnkd.managementbe.service.subtask.SubTaskResponseService;
 import com.nnkd.managementbe.service.task.TaskResponseService;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.bson.types.ObjectId;
@@ -61,12 +63,12 @@ public class SubTaskController {
                 User user = userService.getUser(authenticationService.getEmailFromextractClaims(token));
                 TaskResponse taskResponse = taskResponseService.getTaskById(request.getTask().toString());
 
-                String action = "Add Subtask "+request.getTitle() + " in task "+taskResponse.getName();
-                LogCreationRequest logCreationRequest = LogCreationRequest.builder()
-                        .action(action)
-                        .user(new ObjectId(user.getId()))
-                        .project(new ObjectId(taskResponse.getProject())).build();
-                logRequestService.addLog(logCreationRequest);
+//                String action = "Add Subtask "+request.getTitle() + " in task "+taskResponse.getName();
+//                LogCreationRequest logCreationRequest = LogCreationRequest.builder()
+//                        .action(action)
+//                        .user(new ObjectId(user.getId()))
+//                        .project(new ObjectId(taskResponse.getProject())).build();
+//                logRequestService.addLog(logCreationRequest);
 
                 apiResponse.setResult(subTaskRequestService.addSubTask(request));
                 return apiResponse;
@@ -90,13 +92,13 @@ public class SubTaskController {
                 SubTaskResponse subTaskResponse = subTaskResponseService.getSubTaskById(request.getId());
                 TaskResponse taskResponse = taskResponseService.getTaskById(subTaskResponse.getTask());
 
-                String action = "Update Subtask Name From "+subTaskResponse.getTitle() +" To "+request.getTitle() + " in task "+taskResponse.getName();;
+//                String action = "Update Subtask Name From "+subTaskResponse.getTitle() +" To "+request.getTitle() + " in task "+taskResponse.getName();;
 
-                LogCreationRequest logCreationRequest = LogCreationRequest.builder()
-                        .action(action)
-                        .user(new ObjectId(user.getId()))
-                        .project(new ObjectId(taskResponse.getProject())).build();
-                logRequestService.addLog(logCreationRequest);
+//                LogCreationRequest logCreationRequest = LogCreationRequest.builder()
+//                        .action(action)
+//                        .user(new ObjectId(user.getId()))
+//                        .project(new ObjectId(taskResponse.getProject())).build();
+//                logRequestService.addLog(logCreationRequest);
 
                 apiResponse.setResult(subTaskRequestService.updateSubTaskTitle(request));
                 return apiResponse;
@@ -119,18 +121,26 @@ public class SubTaskController {
                 User user = userService.getUser(authenticationService.getEmailFromextractClaims(token));
                 SubTaskResponse subTaskResponse = subTaskResponseService.getSubTaskById(request.getId());
                 TaskResponse taskResponse = taskResponseService.getTaskById(subTaskResponse.getTask());
-                String action = "";
-                if (request.isCompleted()) {
-                    action += "Check Subtask "+request.getTitle() + " in task "+taskResponse.getName();
-                }else {
-                    action += "Uncheck Subtask "+request.getTitle() + " in task "+taskResponse.getName();
-                }
-                LogCreationRequest logCreationRequest = LogCreationRequest.builder()
-                        .action(action)
-                        .user(new ObjectId(user.getId()))
-                        .project(new ObjectId(taskResponse.getProject())).build();
-                logRequestService.addLog(logCreationRequest);
+//                String action = "";
+//                if (request.isCompleted()) {
+//                    action += "Check Subtask "+request.getTitle() + " in task "+taskResponse.getName();
+//                }else {
+//                    action += "Uncheck Subtask "+request.getTitle() + " in task "+taskResponse.getName();
+//                }
+//                LogCreationRequest logCreationRequest = LogCreationRequest.builder()
+//                        .action(action)
+//                        .user(new ObjectId(user.getId()))
+//                        .project(new ObjectId(taskResponse.getProject())).build();
+//                logRequestService.addLog(logCreationRequest);
 
+
+                LogCreationRequest logCreationRequest = LogCreationRequest.builder()
+                        .userLog(UserLog.builder().id(user.getId()).build())
+                        .taskLog(TaskLog.builder().id(taskResponse.getId()).build())
+                        .subTaskLog(SubTaskLog.builder().id(subTaskResponse.getId()).build())
+                        .project(new ObjectId(taskResponse.getProject())).build();
+
+                logRequestService.logSubTask(logCreationRequest);
 
                 apiResponse.setResult(subTaskRequestService.updateSubTaskStatus(request));
                 return apiResponse;
@@ -152,13 +162,13 @@ public class SubTaskController {
                 SubTaskResponse subTaskResponse = subTaskResponseService.getSubTaskById(id);
                 TaskResponse taskResponse = taskResponseService.getTaskById(subTaskResponse.getTask());
 
-                String action = "Delete Subtask "+subTaskResponse.getTitle() + " in task "+taskResponse.getName();;
-
-                LogCreationRequest logCreationRequest = LogCreationRequest.builder()
-                        .action(action)
-                        .user(new ObjectId(user.getId()))
-                        .project(new ObjectId(taskResponse.getProject())).build();
-                logRequestService.addLog(logCreationRequest);
+//                String action = "Delete Subtask "+subTaskResponse.getTitle() + " in task "+taskResponse.getName();;
+//
+//                LogCreationRequest logCreationRequest = LogCreationRequest.builder()
+//                        .action(action)
+//                        .user(new ObjectId(user.getId()))
+//                        .project(new ObjectId(taskResponse.getProject())).build();
+//                logRequestService.addLog(logCreationRequest);
 
                 return subTaskRequestService.deleteSubTask(id);
             } else {

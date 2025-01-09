@@ -2,6 +2,9 @@ package com.nnkd.managementbe.controller;
 
 import com.nnkd.managementbe.dto.request.*;
 import com.nnkd.managementbe.model.User;
+import com.nnkd.managementbe.model.log.Action;
+import com.nnkd.managementbe.model.log.TaskLog;
+import com.nnkd.managementbe.model.log.UserLog;
 import com.nnkd.managementbe.model.project.ProjectResponse;
 import com.nnkd.managementbe.model.task.TaskResponse;
 import com.nnkd.managementbe.service.AuthenticationService;
@@ -83,14 +86,27 @@ public class TaskController {
                 User user = userService.getUser(email);
                 int position = taskResponseService.getTaskByStatus("todo").size();
 
-                String action = "Add Task "+request.getName();
-                LogCreationRequest logCreationRequest = LogCreationRequest.builder()
-                        .action(action)
-                        .user(new ObjectId(user.getId()))
-                        .project(request.getProject()).build();
-                logRequestService.addLog(logCreationRequest);
+//                String action = "Add Task "+request.getName();
+//                LogCreationRequest logCreationRequest = LogCreationRequest.builder()
+//                        .action(action)
+//                        .user(new ObjectId(user.getId()))
+//                        .project(request.getProject()).build();
+//                logRequestService.addLog(logCreationRequest);
+
 
                 apiResponse.setResult(taskRequestService.addTask(request, new ObjectId(user.getId()), position));
+
+                TaskResponse taskResponse = taskResponseService.getNewTask(user.getId());
+
+                LogCreationRequest logCreationRequest = LogCreationRequest.builder()
+                        .action(String.valueOf(Action.ADD_TASK))
+                        .userLog(UserLog.builder().id(user.getId()).build())
+                        .taskLog(TaskLog.builder().id(taskResponse.getId()).build())
+                        .project(request.getProject()).build();
+
+                logRequestService.logTask(logCreationRequest);
+
+
                 return apiResponse;
             }else {
                 throw new RuntimeException("Invalid token");
@@ -114,12 +130,20 @@ public class TaskController {
                     for (TaskUpdateRequest re : request) {
                         TaskResponse taskResponse = taskResponseService.getTaskById(re.getId());
                         if (taskResponse.getStatus().toString().trim() != re.getStatus().toString().trim()) {
-                            String action = "Move Task \""+taskResponse.getName() +"\" From "+taskResponse.getStatus()+" To "+re.getStatus();
+
                             LogCreationRequest logCreationRequest = LogCreationRequest.builder()
-                                    .action(action)
-                                    .user(new ObjectId(user.getId()))
+                                    .action(String.valueOf(Action.MOVE_TASK))
+                                    .userLog(UserLog.builder().id(user.getId()).build())
+                                    .taskLog(TaskLog.builder().id(re.getId()).build())
                                     .project(new ObjectId(taskResponse.getProject())).build();
-                            logRequestService.addLog(logCreationRequest);
+                            logRequestService.logTask(logCreationRequest);
+
+//                            String action = "Move Task \""+taskResponse.getName() +"\" From "+taskResponse.getStatus()+" To "+re.getStatus();
+//                            LogCreationRequest logCreationRequest = LogCreationRequest.builder()
+//                                    .action(action)
+//                                    .user(new ObjectId(user.getId()))
+//                                    .project(new ObjectId(taskResponse.getProject())).build();
+//                            logRequestService.addLog(logCreationRequest);
                         }
                         taskRequestService.updateTaskStatusAndPosition(re);
                     }
@@ -166,12 +190,12 @@ public class TaskController {
 
                 TaskResponse taskResponse = taskResponseService.getTaskById(request.getId());
 
-                String action = "Update Task Name From "+request.getName() +" To "+taskResponse.getName();
-                LogCreationRequest logCreationRequest = LogCreationRequest.builder()
-                        .action(action)
-                        .user(new ObjectId(user.getId()))
-                        .project(new ObjectId(taskResponse.getProject())).build();
-                logRequestService.addLog(logCreationRequest);
+//                String action = "Update Task Name From "+request.getName() +" To "+taskResponse.getName();
+//                LogCreationRequest logCreationRequest = LogCreationRequest.builder()
+//                        .action(action)
+//                        .user(new ObjectId(user.getId()))
+//                        .project(new ObjectId(taskResponse.getProject())).build();
+//                logRequestService.addLog(logCreationRequest);
 
                 apiResponse.setResult(taskRequestService.updateTaskName(request));
                 return apiResponse;
@@ -193,15 +217,22 @@ public class TaskController {
                 User user = userService.getUser(authenticationService.getEmailFromextractClaims(token));
 
                 TaskResponse taskResponse = taskResponseService.getTaskById(request.getId());
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy, HH:mm")
-                        .withZone(ZoneId.of("UTC"));
+//                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy, HH:mm")
+//                        .withZone(ZoneId.of("UTC"));
 
-                String action = "Update Task \""+ taskResponse.getName() +"\" Deadline To "+formatter.format(request.getDeadline());
                 LogCreationRequest logCreationRequest = LogCreationRequest.builder()
-                        .action(action)
-                        .user(new ObjectId(user.getId()))
+                        .action(String.valueOf(Action.CHANGE_DEADLINE))
+                        .userLog(UserLog.builder().id(user.getId()).build())
+                        .taskLog(TaskLog.builder().id(taskResponse.getId()).build())
                         .project(new ObjectId(taskResponse.getProject())).build();
-                logRequestService.addLog(logCreationRequest);
+                logRequestService.logTask(logCreationRequest);
+
+//                String action = "Update Task \""+ taskResponse.getName() +"\" Deadline To "+formatter.format(request.getDeadline());
+//                LogCreationRequest logCreationRequest = LogCreationRequest.builder()
+//                        .action(action)
+//                        .user(new ObjectId(user.getId()))
+//                        .project(new ObjectId(taskResponse.getProject())).build();
+//                logRequestService.addLog(logCreationRequest);
 
                 apiResponse.setResult(taskRequestService.updateTaskDeadline(request));
                 return apiResponse;
@@ -221,12 +252,21 @@ public class TaskController {
             if (isValid) {
                 User user = userService.getUser(authenticationService.getEmailFromextractClaims(token));
                 TaskResponse taskResponse = taskResponseService.getTaskById(id);
-                String action = "Delete Task "+taskResponse.getName();
+
                 LogCreationRequest logCreationRequest = LogCreationRequest.builder()
-                        .action(action)
-                        .user(new ObjectId(user.getId()))
+                        .action(String.valueOf(Action.DELETE_TASK))
+                        .userLog(UserLog.builder().id(user.getId()).build())
+                        .taskLog(TaskLog.builder().id(id).build())
                         .project(new ObjectId(taskResponse.getProject())).build();
-                logRequestService.addLog(logCreationRequest);
+                logRequestService.logTask(logCreationRequest);
+
+//                String action = "Delete Task "+taskResponse.getName();
+//                LogCreationRequest logCreationRequest = LogCreationRequest.builder()
+//                        .action(action)
+//                        .user(new ObjectId(user.getId()))
+//                        .project(new ObjectId(taskResponse.getProject())).build();
+//                logRequestService.addLog(logCreationRequest);
+
                 return taskRequestService.deleteTask(id);
             }else {
                 throw new RuntimeException("Invalid token");

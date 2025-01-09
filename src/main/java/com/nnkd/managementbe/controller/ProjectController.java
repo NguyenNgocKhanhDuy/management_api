@@ -116,14 +116,14 @@ public class ProjectController {
             String token = authorizationHeader.substring(7);
             boolean isValid = authenticationService.verifyToken(token);
             if (isValid) {
-                User user = userService.getUser(authenticationService.getEmailFromextractClaims(token));
+//                User user = userService.getUser(authenticationService.getEmailFromextractClaims(token));
                 ApiResponse apiResponse = new ApiResponse();
-                String action = "Updated project name to " + request.getName();
-                LogCreationRequest logCreationRequest = LogCreationRequest.builder()
-                        .action(action)
-                        .user(new ObjectId(user.getId()))
-                        .project(new ObjectId(request.getId())).build();
-                logRequestService.addLog(logCreationRequest);
+//                String action = "Updated project name to " + request.getName();
+//                LogCreationRequest logCreationRequest = LogCreationRequest.builder()
+//                        .action(action)
+//                        .user(new ObjectId(user.getId()))
+//                        .project(new ObjectId(request.getId())).build();
+//                logRequestService.addLog(logCreationRequest);
                 apiResponse.setResult(projectRequestService.updateProjectName(request));
                 return apiResponse;
             }else {
@@ -249,12 +249,12 @@ public class ProjectController {
                 ProjectRequest updatePending = projectRequestService.updateProjectPending(request);
                 ProjectRequest updateMember = projectRequestService.updateProjectMembers(request);
 
-                String action = "Joined the project";
-                LogCreationRequest logCreationRequest = LogCreationRequest.builder()
-                        .action(action)
-                        .user(new ObjectId(user.getId()))
-                        .project(new ObjectId(request.getId())).build();
-                logRequestService.addLog(logCreationRequest);
+//                String action = "Joined the project";
+//                LogCreationRequest logCreationRequest = LogCreationRequest.builder()
+//                        .action(action)
+//                        .user(new ObjectId(user.getId()))
+//                        .project(new ObjectId(request.getId())).build();
+//                logRequestService.addLog(logCreationRequest);
 
                 apiResponse.setResult(updatePending != null && updateMember != null);
                 return apiResponse;

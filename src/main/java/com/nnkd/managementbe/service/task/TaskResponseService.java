@@ -7,6 +7,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.bson.types.ObjectId;
+import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +40,16 @@ public class TaskResponseService {
 
     public List<TaskResponse> getAlls() {
         return taskRepository.findAll();
+    }
+
+    public TaskResponse getNewTask(String id) {
+        List<TaskResponse> tasks = taskRepository.findByCreator(new ObjectId(id), Sort.by(Sort.Order.desc("createdAt")));
+
+        if (tasks.isEmpty()) {
+            return null;
+        }
+
+        return tasks.get(0);
     }
 
     public List<TaskResponse> searchTaskByName(ObjectId id, String taskName) {

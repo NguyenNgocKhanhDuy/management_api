@@ -16,12 +16,38 @@ import java.time.LocalDateTime;
 public class LogRequestService {
     LogRequestRepository repository;
 
-    public LogRequest addLog(LogCreationRequest request){
+    public LogRequest logTask(LogCreationRequest request){
         LogRequest logRequest = LogRequest.builder()
                 .action(request.getAction())
-                .user(request.getUser())
+                .userLog(request.getUserLog())
+                .taskLog(request.getTaskLog())
+                .subTaskLog(null)
                 .dateTime(LocalDateTime.now())
                 .project(request.getProject()).build();
         return repository.save(logRequest);
     }
+
+    public LogRequest logSubTask(LogCreationRequest request){
+        LogRequest logRequest = LogRequest.builder()
+                .action(request.getAction())
+                .userLog(request.getUserLog())
+                .taskLog(null)
+                .subTaskLog(request.getSubTaskLog())
+                .dateTime(LocalDateTime.now())
+                .project(request.getProject()).build();
+        return repository.save(logRequest);
+    }
+
+    public LogRequest logAddUser(LogCreationRequest request){
+        LogRequest logRequest = LogRequest.builder()
+                .action(request.getAction())
+                .userLog(request.getUserLog())
+                .taskLog(null)
+                .subTaskLog(null)
+                .dateTime(LocalDateTime.now())
+                .project(request.getProject()).build();
+        return repository.save(logRequest);
+    }
+
+
 }

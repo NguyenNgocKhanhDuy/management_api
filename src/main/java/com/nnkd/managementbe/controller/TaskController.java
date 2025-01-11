@@ -134,7 +134,7 @@ public class TaskController {
                             LogCreationRequest logCreationRequest = LogCreationRequest.builder()
                                     .action(Action.MOVE_TASK.getDescription())
                                     .userLog(UserLog.builder().id(user.getId()).build())
-                                    .taskLog(TaskLog.builder().id(re.getId()).build())
+                                    .taskLog(TaskLog.builder().id(re.getId()).status(re.getStatus().toString().trim()).build())
                                     .project(new ObjectId(taskResponse.getProject())).build();
                             logRequestService.logTask(logCreationRequest);
 

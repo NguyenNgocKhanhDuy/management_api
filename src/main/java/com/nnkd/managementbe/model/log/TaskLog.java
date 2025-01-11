@@ -14,4 +14,5 @@ public class TaskLog {
     @Id
     String id;
     String name;
+    String status;
 }

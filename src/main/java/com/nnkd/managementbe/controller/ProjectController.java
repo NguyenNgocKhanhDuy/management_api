@@ -10,6 +10,7 @@ import com.nnkd.managementbe.service.log.LogRequestService;
 import com.nnkd.managementbe.service.project.ProjectRequestService;
 import com.nnkd.managementbe.service.UserService;
 import com.nnkd.managementbe.service.project.ProjectResponseService;
+import com.nnkd.managementbe.utils.TokenUtils;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 
 @RestController
@@ -48,6 +50,17 @@ public class ProjectController {
         }else  {
             throw new RuntimeException("Authorization header is missing or malformed");
         }
+    }
+
+    @GetMapping({"/id"})
+    public ApiResponse getProjectByIdNoToken(@RequestParam String token) {
+        ApiResponse apiResponse = new ApiResponse();
+        String tokenDecode = TokenUtils.decodeToken(token);
+        StringTokenizer tokenizer = new StringTokenizer(tokenDecode, "-");
+        String idProject = tokenizer.nextToken();
+        ProjectResponse projectResponse = projectResponseService.getProjectById(idProject);
+        apiResponse.setResult(projectResponse);
+        return apiResponse;
     }
 
     @GetMapping("/projectsHasUser")
@@ -203,7 +216,10 @@ public class ProjectController {
                 User creator = userService.getUserById(projectResponse.getCreator());
                 String subject = "Invitation";
                 String text = "Invitation to project: "+projectResponse.getName()+" from: "+creator.getUsername()+" ("+creator.getEmail()+")";
+                text += "\nPlease use application to confirm or link below\n";
                 for (ObjectId id: filter) {
+                    String tokenText = projectResponse.getId()+"-"+id.toString();
+                    text += "https://nnkd-management.onrender.com/confirm?token="+TokenUtils.encodeToken(tokenText);
                     User user = userService.getUserById(id.toString());
                     MailSendRequest mail = MailSendRequest.builder().to(user.getEmail()).subject(subject).text(text).build();
                     mailService.sendMail(mail);
@@ -266,6 +282,43 @@ public class ProjectController {
         }
     }
 
+    @PutMapping("/userAcceptPendingURL")
+    public ApiResponse userAcceptPendingURL(@RequestParam String token) {
+        ApiResponse apiResponse = new ApiResponse();
+        String tokenDecode = TokenUtils.decodeToken(token);
+        StringTokenizer tokenizer = new StringTokenizer(tokenDecode, "-");
+        String idProject = tokenizer.nextToken();
+        String idUser = tokenizer.nextToken();
+        ProjectResponse projectResponse = projectResponseService.getProjectById(idProject);
+
+        List<String> pendingOld = projectResponse.getPending();
+
+        User user = userService.getUserById(idUser);
+
+        List<ObjectId> pendingOldObjectId = pendingOld.stream().map(id -> new ObjectId(id)).collect(Collectors.toList());
+        List<ObjectId> pendingNew = pendingOldObjectId.stream().filter(id -> !id.toString().equals(user.getId())).collect(Collectors.toList());
+
+        List<String> members = projectResponse.getMembers();
+
+        List<ObjectId> membersObjectId = new ArrayList<>();
+        if (members != null) {
+            membersObjectId = members.stream().map(id -> new ObjectId(id)).collect(Collectors.toList());
+        }
+
+        membersObjectId.add(new ObjectId(user.getId()));
+
+        ProjectUpdateRequest projectUpdateRequest = ProjectUpdateRequest.builder()
+                .id(idProject).members(membersObjectId).pending(pendingNew).build();
+
+        ProjectRequest updatePending = projectRequestService.updateProjectPending(projectUpdateRequest);
+        ProjectRequest updateMember = projectRequestService.updateProjectMembers(projectUpdateRequest);
+
+        apiResponse.setResult(updatePending != null && updateMember != null);
+        return apiResponse;
+    }
+
+
+
     @PutMapping("/userRejectPending")
     public ApiResponse userRejectPending(@RequestHeader("Authorization") String authorizationHeader, @RequestBody ProjectUpdateRequest request) {
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
@@ -297,6 +350,37 @@ public class ProjectController {
         }else  {
             throw new RuntimeException("Authorization header is missing or malformed");
         }
+    }
+
+    @PutMapping("/userRejectPendingURL")
+    public ApiResponse userRejectPendingURL(@RequestParam String token) {
+        ApiResponse apiResponse = new ApiResponse();
+        String tokenDecode = TokenUtils.decodeToken(token);
+        StringTokenizer tokenizer = new StringTokenizer(tokenDecode, "-");
+        String idProject = tokenizer.nextToken();
+        String idUser = tokenizer.nextToken();
+
+        ProjectResponse projectResponse = projectResponseService.getProjectById(idProject);
+        List<String> pendingOld = projectResponse.getPending();
+
+        User user = userService.getUserById(idUser);
+
+        List<ObjectId> pendingOldObjectId = pendingOld.stream().map(id -> new ObjectId(id)).collect(Collectors.toList());
+        List<ObjectId> pendingNew = pendingOldObjectId.stream().filter(id -> !id.toString().equals(user.getId())).collect(Collectors.toList());
+
+        ProjectUpdateRequest projectUpdateRequest = ProjectUpdateRequest.builder()
+                .id(idProject).pending(pendingNew).build();
+
+        User creator = userService.getUserById(projectResponse.getCreator());
+        String subject = "Reject invitation";
+
+        String text = "User: "+user.getUsername()+" ("+user.getEmail()+")"+", rejected your invitation";
+
+        MailSendRequest mail = MailSendRequest.builder().to(creator.getEmail()).subject(subject).text(text).build();
+        mailService.sendMail(mail);
+
+        apiResponse.setResult(projectRequestService.updateProjectPending(projectUpdateRequest));
+        return apiResponse;
     }
 
     @GetMapping("/search")

@@ -4,7 +4,10 @@ import com.nnkd.managementbe.dto.request.ApiResponse;
 import com.nnkd.managementbe.dto.request.ProjectCreationRequest;
 import com.nnkd.managementbe.dto.request.ProjectUpdateRequest;
 import com.nnkd.managementbe.model.project.ProjectRequest;
+import com.nnkd.managementbe.model.task.TaskResponse;
 import com.nnkd.managementbe.repository.project.ProjectRequestRepository;
+import com.nnkd.managementbe.service.task.TaskRequestService;
+import com.nnkd.managementbe.service.task.TaskResponseService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -19,6 +22,8 @@ import java.util.NoSuchElementException;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ProjectRequestService {
     ProjectRequestRepository projectRepository;
+    TaskResponseService taskResponseService;
+    TaskRequestService taskRequestService;
 
     public ProjectRequest addProject(ProjectCreationRequest request) {
         ProjectRequest project = ProjectRequest.builder().name(request.getName()).creator(request.getCreator()).date(request.getDate()).build();
@@ -59,6 +64,10 @@ public class ProjectRequestService {
         try {
             projectRepository.findById(id);
             projectRepository.deleteById(id);
+            List<TaskResponse> list = taskResponseService.getTasksOfProject(new ObjectId(id));
+            for (TaskResponse t: list) {
+                taskRequestService.deleteTask(t.getId());
+            }
             ApiResponse apiResponse = new ApiResponse();
             apiResponse.setResult("Delete Successfully");
             return apiResponse;

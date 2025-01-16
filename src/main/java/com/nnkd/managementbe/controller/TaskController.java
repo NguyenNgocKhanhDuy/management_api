@@ -18,12 +18,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.bson.types.ObjectId;
-import org.springframework.cglib.core.Local;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.*;
-import java.time.chrono.ChronoLocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -305,6 +303,7 @@ public class TaskController {
 
         for (TaskResponse task : tasks) {
             if (!task.isSend()) {
+                System.out.println(task);
                 Instant deadline = task.getDeadline();
 
                 if (deadline.minus(Duration.ofHours(12)).isBefore(nowLocal.toInstant(ZoneOffset.UTC)) && !task.isSend()) {

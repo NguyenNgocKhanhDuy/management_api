@@ -58,7 +58,12 @@ public class ProjectController {
         String tokenDecode = TokenUtils.decodeToken(token);
         StringTokenizer tokenizer = new StringTokenizer(tokenDecode, "-");
         String idProject = tokenizer.nextToken();
+        String idUser = tokenizer.nextToken();
         ProjectResponse projectResponse = projectResponseService.getProjectById(idProject);
+        boolean hasInvite = projectResponse.getPending().contains(idUser);
+        if (!hasInvite) {
+            projectResponse.setPending(null);
+        }
         apiResponse.setResult(projectResponse);
         return apiResponse;
     }

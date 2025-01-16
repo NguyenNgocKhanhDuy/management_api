@@ -98,7 +98,7 @@ public class AuthenticationService {
                 .issuer("nnkd.com")
                 .issueTime(new Date())
                 .expirationTime(new Date(
-                        Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()
+                        Instant.now().plus(3, ChronoUnit.HOURS).toEpochMilli()
                 ))
                 .claim("customClaim", "Custom")
                 .build();

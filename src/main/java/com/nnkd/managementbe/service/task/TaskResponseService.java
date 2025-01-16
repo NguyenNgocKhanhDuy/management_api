@@ -27,7 +27,7 @@ public class TaskResponseService {
 
     public TaskResponse getTaskById(String id) {
         try {
-            TaskResponse taskResponse = taskRepository.findById(id).get();
+            TaskResponse taskResponse = taskRepository.findById(id).orElse(null);
             return taskResponse;
         }catch (NoSuchElementException e) {
             throw new NoSuchElementException("No Task found: "+id);

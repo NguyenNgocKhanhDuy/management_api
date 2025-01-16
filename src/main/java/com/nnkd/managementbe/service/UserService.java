@@ -29,7 +29,7 @@ public class UserService {
     }
     public User getUserById(String id) {
         try {
-            User user = userRepository.findById(id).get();
+            User user = userRepository.findById(id).orElse(null);
             return user;
         }catch (NoSuchElementException e) {
             throw new NoSuchElementException("No user found: "+id);

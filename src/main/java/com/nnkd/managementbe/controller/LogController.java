@@ -17,6 +17,7 @@ import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -65,12 +66,19 @@ public class LogController {
                 Page<LogResponse> logPages = logResponseService.getLogsOfProjectPage(new ObjectId(id), page);
 
                 List<LogResponse> logs = logPages.getContent();
+                List<LogResponse> newLogs = new ArrayList<>();
 
                 for (LogResponse log : logs) {
                     updateTaskAndSubtaskNames(log);
                 }
 
-                apiResponse.setResult(logs);
+                for (LogResponse log: logs) {
+                    if (log != null) {
+                        newLogs.add(log);
+                    }
+                }
+
+                apiResponse.setResult(newLogs);
                 return apiResponse;
             }else {
                 throw new RuntimeException("Invalid token");
@@ -81,25 +89,31 @@ public class LogController {
     }
 
     private void updateTaskAndSubtaskNames(LogResponse log) {
-        if (log.getUserLog() != null) {
+        if (log != null && log.getUserLog() != null) {
             User user = userService.getUserById(log.getUserLog().getId());
             if (user != null) {
                 log.getUserLog().setName(user.getUsername());
+            }else {
+                log = null;
             }
         }
 
-        if (log.getTaskLog() != null) {
+        if (log != null && log.getTaskLog() != null) {
             TaskResponse task = taskResponseService.getTaskById(log.getTaskLog().getId());
             if (task != null) {
                 log.getTaskLog().setName(task.getName());
+            }else {
+                log = null;
             }
         }
 
 
-        if (log.getSubTaskLog() != null) {
+        if (log != null && log.getSubTaskLog() != null) {
             SubTaskResponse subTask = subTaskResponseService.getSubTaskById(log.getSubTaskLog().getId());
             if (subTask != null) {
                 log.getSubTaskLog().setName(subTask.getTitle());
+            }else {
+                log = null;
             }
         }
     }

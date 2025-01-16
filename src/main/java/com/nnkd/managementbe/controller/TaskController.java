@@ -302,7 +302,7 @@ public class TaskController {
 
 
         for (TaskResponse task : tasks) {
-            if (!task.isSend()) {
+            if (!task.isSend() && task.getDeadline() != null) {
                 System.out.println(task);
                 Instant deadline = task.getDeadline();
 

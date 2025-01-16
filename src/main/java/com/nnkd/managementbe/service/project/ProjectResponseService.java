@@ -26,7 +26,7 @@ public class ProjectResponseService {
 
     public ProjectResponse getProjectById(String id) {
         try {
-            ProjectResponse projectResponse = projectRepository.findById(id).get();
+            ProjectResponse projectResponse = projectRepository.findById(id).orElse(null);
             return projectResponse;
         } catch (NoSuchElementException e) {
             throw new NoSuchElementException("No project found: " + id);

@@ -224,7 +224,7 @@ public class ProjectController {
                 text += "\nPlease use application to confirm or link below\n";
                 for (ObjectId id: filter) {
                     String tokenText = projectResponse.getId()+"-"+id.toString();
-                    text += "https://nnkd-management.onrender.com/confirm?token="+TokenUtils.encodeToken(tokenText);
+                    text += "https://nnkd-management.onrender.com?invite=yes&token="+TokenUtils.encodeToken(tokenText);
                     User user = userService.getUserById(id.toString());
                     MailSendRequest mail = MailSendRequest.builder().to(user.getEmail()).subject(subject).text(text).build();
                     mailService.sendMail(mail);
